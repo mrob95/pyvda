@@ -162,8 +162,7 @@ class IVirtualDesktopManager(IUnknown):
         ),
     ]
 
-
-def get_desktop_count():
+def _register_service():
     CoInitialize()
     pServiceProvider = CoCreateInstance(
         CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
@@ -174,9 +173,28 @@ def get_desktop_count():
         ),
         POINTER(IVirtualDesktopManagerInternal),
     )
+    return pServiceProvider, pManagerInternal
+
+def get_desktop_count():
+    pServiceProvider, pManagerInternal = _register_service()
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
     return array.GetCount()
+
+# IVirtualDesktop* _GetDesktopByNumber(int number)
+def _get_desktop_by_number(number):
+    pServiceProvider, pManagerInternal = _register_service()
+    array = POINTER(IObjectArray)()
+    found = POINTER(IVirtualDesktop)()
+    pManagerInternal.GetDesktops(array)
+    array.GetAt(number, IVirtualDesktop._iid_, found)
+    return found
+
+def _get_current_desktop():
+    pServiceProvider, pManagerInternal = _register_service()
+    found = POINTER(IVirtualDesktop)()
+    pManagerInternal.GetCurrentDesktop(found)
+    return found
 
 
 def current_desktop_id():
