@@ -18,12 +18,10 @@ from objects import (
     IObjectArray,
     IApplicationViewCollection,
     IServiceProvider,
+    CLSID_ImmersiveShell,
+    CLSID_IVirtualDesktopManager,
+    CLSID_VirtualDesktopManagerInternal,
 )
-
-CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")
-CLSID_VirtualDesktopManagerInternal = GUID("{C5E0CDCA-7B6E-41B2-9FC4-D93975CC467B}")
-CLSID_IVirtualDesktopManager = GUID("{AA509086-5CA9-4C25-8F95-589D3C07B48A}")
-
 
 def _register_service():
     CoInitialize()
@@ -35,17 +33,6 @@ def _register_service():
         CLSID_VirtualDesktopManagerInternal, IVirtualDesktopManagerInternal._iid_,
         pManagerInternal
     ),
-    # pManagerInternal = cast(
-    #     pManagerInternal,
-    #     POINTER(IVirtualDesktopManagerInternal),
-    # )
-    # pManager = cast(
-    #     pServiceProvider.QueryService(
-    #         CLSID_IVirtualDesktopManager,
-    #         IVirtualDesktopManager._iid_,
-    #     ),
-    #     POINTER(IVirtualDesktopManager),
-    # )
     pManager = CoCreateInstance(CLSID_IVirtualDesktopManager, IVirtualDesktopManager)
     return pManager, pManagerInternal
 
@@ -53,7 +40,8 @@ def _register_service():
 def get_desktop_count():
     pManager, pManagerInternal = _register_service()
     array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    ret = pManagerInternal.GetDesktops(array)
+    print(ret)
     count = array.GetCount()
     return count
 
@@ -63,7 +51,6 @@ def _get_desktop_by_number(number):
     pManager, pManagerInternal = _register_service()
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
-    # found = array.GetAt(number, IVirtualDesktop._iid_)
     found = POINTER(IVirtualDesktop)()
     array.GetAt(number, IVirtualDesktop._iid_, found)
     return found
@@ -98,12 +85,6 @@ def current_desktop_id():
 def move_window_to(hwnd, number):
     pManager, pManagerInternal = _register_service()
     desktop = _get_desktop_by_number(number)
-    # IApplicationView* app = nullptr;
-    # 		viewCollection->GetViewForHwnd(window, &app);
-    # 		if (app != nullptr) {
-    # 			pDesktopManagerInternal->MoveViewToDesktop(app, pDesktop);
-    # 			return true;
-    # 		}
     pServiceProvider = CoCreateInstance(
         CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
     )
@@ -129,10 +110,10 @@ def go_to_desktop(number):
 
 print(get_desktop_count())
 print(current_desktop_id())
-go_to_desktop(0)
+# go_to_desktop(0)
 
 from dragonfly import Window
 
 current = Window.get_foreground()
 print(current)
-move_window_to(current.handle, 1)
+# move_window_to(current.handle, 1)
