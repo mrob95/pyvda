@@ -55,14 +55,14 @@ def _get_desktop_by_number(number):
     pManagerInternal = _get_vd_manager_internal()
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
-    if number < 0:
+    if number <= 0:
         raise ValueError(
-            f"Desktop number must be at least zero, {number} provided"
+            f"Desktop number must be at least 1, {number} provided"
         )
     desktop_count = array.GetCount()
-    if number >= desktop_count:
+    if number > desktop_count:
         raise ValueError(
-            f"Desktop number {number} exceeds the maximum allowed, {desktop_count - 1} (remember that desktops are zero indexed)",
+            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
         )
     found = POINTER(IVirtualDesktop)()
     array.GetAt(number, IVirtualDesktop._iid_, found)
@@ -82,9 +82,9 @@ def _get_desktop_by_id(id):
 
 
 def _check_version():
-    if sys.getwindowsversion().major != 10:
-        raise WindowsError("The virtual desktop feature is only available on Windows 10")
-
+    # if sys.getwindowsversion().major != 10:
+    #     raise WindowsError("The virtual desktop feature is only available on Windows 10")
+    pass
 
 def _get_desktop_number(desktop):
     pManagerInternal = _get_vd_manager_internal()
@@ -99,16 +99,25 @@ def _get_desktop_number(desktop):
             return i
 
 
-def GetCurrentDesktopNumber():
+def GetCurrentDesktopNumber() -> int:
+    """
+    Returns:
+        int -- The number of the virtual desktop you're currently on, with the first being number 1 etc.
+    """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
     currentDesktop = POINTER(IVirtualDesktop)()
     pManagerInternal.GetCurrentDesktop(currentDesktop)
     number = _get_desktop_number(currentDesktop)
-    return number
+    # Account for zero indexing
+    return number + 1
 
 
-def GetDesktopCount():
+def GetDesktopCount() -> int:
+    """
+    Returns:
+        int -- The number of virtual desktops active.
+    """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
     array = POINTER(IObjectArray)()
@@ -117,43 +126,66 @@ def GetDesktopCount():
     return count
 
 
-def MoveWindowToDesktopNumber(hwnd, number):
+def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
+    """
+    Move a window to a different virtual desktop.
+
+    Arguments:
+        hwnd {int} -- Handle of the window to be moved, from e.g. win32gui.GetForegroundWindow().
+        number {int} -- Desktop number to move the window to, between 1 and the number of desktops active.
+    """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
     pViewCollection = _get_view_collection()
     pApplicationView = POINTER(IApplicationView)()
     pViewCollection.GetViewForHwnd(hwnd, pApplicationView)
-    desktop = _get_desktop_by_number(number)
+    # Subtract one because desktops are zero indexed internally
+    desktop = _get_desktop_by_number(number - 1)
     pManagerInternal.MoveViewToDesktop(pApplicationView, desktop)
 
 
-def GoToDesktopNumber(number):
+def GoToDesktopNumber(number: int) -> None:
+    """
+    Switch to a different virtual desktop.
+
+    Arguments:
+        number {int} -- Desktop number to switch to.
+    """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
 
-    if number < 0:
+    if number <= 0:
         raise ValueError(
-            f"Desktop number must be at least zero, {number} provided"
+            f"Desktop number must be at least 1, {number} provided"
         )
     desktop_count = array.GetCount()
-    if number >= desktop_count:
+    if number > desktop_count:
         raise ValueError(
-            f"Desktop number {number} exceeds the maximum allowed, {desktop_count - 1} (remember that desktops are zero indexed)",
+            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
         )
 
     desktop = POINTER(IVirtualDesktop)()
-    array.GetAt(number, IVirtualDesktop._iid_, desktop)
+    array.GetAt(number - 1, IVirtualDesktop._iid_, desktop)
     pManagerInternal.SwitchDesktop(desktop)
 
 
-def GetWindowDesktopNumber(hwnd):
+def GetWindowDesktopNumber(hwnd: int) -> int:
+    """
+    Returns the number of the desktop which a particular window is on.
+
+    Arguments:
+        hwnd {int} -- Handle of the window, from e.g. win32gui.GetForegroundWindow().
+
+    Returns:
+        int -- Its desktop number.
+    """
     _check_version()
     pViewCollection = _get_view_collection()
     app = POINTER(IApplicationView)()
     pViewCollection.GetViewForHwnd(hwnd, app)
     desktopId = app.GetVirtualDesktopId()
     desktop = _get_desktop_by_id(desktopId)
-    desktop_number = _get_desktop_number(desktop)
+    desktop_number = _get_desktop_number(desktop) + 1
     return desktop_number

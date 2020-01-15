@@ -11,16 +11,15 @@ setup(
     author="Mike Roberts",
     author_email="mike.roberts.2k10@googlemail.com",
     license="LICENSE.txt",
-    url="https://github.com/mrob95/Breathe",
+    url="https://github.com/mrob95/py-VirtualDesktopAccessor",
     long_description = read("README.md"),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=("tests", "tests.*")),
     install_requires=["pywin32"],
     classifiers=[
                    "Environment :: Win32 (MS Windows)",
-                   "License :: OSI Approved :: MIT",
+                   "License :: OSI Approved :: MIT License",
                    "Operating System :: Microsoft :: Windows",
-                   "Programming Language :: Python :: 2.7",
                    "Programming Language :: Python :: 3.7",
                   ],
 )
