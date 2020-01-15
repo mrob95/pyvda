@@ -1,5 +1,4 @@
-from ctypes import *
-from ctypes.wintypes import *
+from ctypes import POINTER
 import sys
 from comtypes import (
     IUnknown,
@@ -11,7 +10,7 @@ from comtypes import (
     cast,
     CLSCTX_LOCAL_SERVER,
 )
-from objects import (
+from .win10desktops import (
     IVirtualDesktop,
     IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
