@@ -84,7 +84,7 @@ IApplicationView._methods_ = [
 	STDMETHOD(HRESULT, "GetNeediness", (POINTER(UINT),)),
 	STDMETHOD(HRESULT, "GetLastActivationTimestamp", (POINTER(ULONGLONG),)),
 	STDMETHOD(HRESULT, "SetLastActivationTimestamp", (ULONGLONG,)),
-	STDMETHOD(HRESULT, "GetVirtualDesktopId", (POINTER(GUID),)),
+	COMMETHOD([], HRESULT, "GetVirtualDesktopId", (["out"], POINTER(GUID), "pGuid")),
 	STDMETHOD(HRESULT, "SetVirtualDesktopId", (REFGUID,)),
 	STDMETHOD(HRESULT, "GetShowInSwitchers", (POINTER(UINT),)),
 	STDMETHOD(HRESULT, "SetShowInSwitchers", (UINT,)),
