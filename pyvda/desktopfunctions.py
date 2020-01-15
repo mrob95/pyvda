@@ -1,5 +1,5 @@
 from ctypes import POINTER
-import sys
+import platform
 from comtypes import (
     IUnknown,
     GUID,
@@ -51,24 +51,6 @@ def _get_view_collection():
     return pViewCollection
 
 
-def _get_desktop_by_number(number):
-    pManagerInternal = _get_vd_manager_internal()
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
-    if number <= 0:
-        raise ValueError(
-            f"Desktop number must be at least 1, {number} provided"
-        )
-    desktop_count = array.GetCount()
-    if number > desktop_count:
-        raise ValueError(
-            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
-        )
-    found = POINTER(IVirtualDesktop)()
-    array.GetAt(number, IVirtualDesktop._iid_, found)
-    return found
-
-
 def _get_desktop_by_id(id):
     pManagerInternal = _get_vd_manager_internal()
     array = POINTER(IObjectArray)()
@@ -81,11 +63,6 @@ def _get_desktop_by_id(id):
             return item
 
 
-def _check_version():
-    # if sys.getwindowsversion().major != 10:
-    #     raise WindowsError("The virtual desktop feature is only available on Windows 10")
-    pass
-
 def _get_desktop_number(desktop):
     pManagerInternal = _get_vd_manager_internal()
     target_id = desktop.GetID()
@@ -97,6 +74,11 @@ def _get_desktop_number(desktop):
         item_id = item.GetID()
         if item_id == target_id:
             return i
+
+
+def _check_version():
+    if platform.system() != "Windows" or platform.release() != "10":
+        raise WindowsError("The virtual desktop feature is only available on Windows 10")
 
 
 def GetCurrentDesktopNumber() -> int:
@@ -137,10 +119,26 @@ def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
     pViewCollection = _get_view_collection()
+    # Get the IApplicationView for the window
     pApplicationView = POINTER(IApplicationView)()
     pViewCollection.GetViewForHwnd(hwnd, pApplicationView)
-    # Subtract one because desktops are zero indexed internally
-    desktop = _get_desktop_by_number(number - 1)
+
+    # Get the IVirtualDesktop for the target desktop
+    array = POINTER(IObjectArray)()
+    pManagerInternal.GetDesktops(array)
+    if number <= 0:
+        raise ValueError(
+            f"Desktop number must be at least 1, {number} provided"
+        )
+    desktop_count = array.GetCount()
+    if number > desktop_count:
+        raise ValueError(
+            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
+        )
+    desktop = POINTER(IVirtualDesktop)()
+    # -1 to get correct index
+    array.GetAt(number - 1, IVirtualDesktop._iid_, desktop)
+
     pManagerInternal.MoveViewToDesktop(pApplicationView, desktop)
 
 
