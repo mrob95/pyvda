@@ -47,6 +47,7 @@ PWSTR = POINTER(WCHAR)
 REFGUID = POINTER(GUID)
 REFIID = POINTER(GUID)
 
+
 class HSTRING(Structure):
     _fields_ = [("value", WCHAR), ("size", UINT)]
 

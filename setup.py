@@ -15,7 +15,7 @@ setup(
     long_description = read("README.md"),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=("tests", "tests.*")),
-    install_requires=["pywin32"],
+    install_requires=["pywin32", "comtypes"],
     classifiers=[
                    "Environment :: Win32 (MS Windows)",
                    "License :: OSI Approved :: MIT License",

@@ -78,7 +78,9 @@ def _get_desktop_number(desktop):
 
 def _check_version():
     if platform.system() != "Windows" or platform.release() != "10":
-        raise WindowsError("The virtual desktop feature is only available on Windows 10")
+        raise WindowsError(
+            "The virtual desktop feature is only available on Windows 10"
+        )
 
 
 def GetCurrentDesktopNumber() -> int:
@@ -127,9 +129,7 @@ def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
     if number <= 0:
-        raise ValueError(
-            f"Desktop number must be at least 1, {number} provided"
-        )
+        raise ValueError(f"Desktop number must be at least 1, {number} provided")
     desktop_count = array.GetCount()
     if number > desktop_count:
         raise ValueError(
@@ -155,9 +155,7 @@ def GoToDesktopNumber(number: int) -> None:
     pManagerInternal.GetDesktops(array)
 
     if number <= 0:
-        raise ValueError(
-            f"Desktop number must be at least 1, {number} provided"
-        )
+        raise ValueError(f"Desktop number must be at least 1, {number} provided")
     desktop_count = array.GetCount()
     if number > desktop_count:
         raise ValueError(
