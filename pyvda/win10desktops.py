@@ -18,9 +18,7 @@ from comtypes import (
     IID,
     STDMETHOD,
     COMMETHOD,
-    CoInitialize,
     CoCreateInstance,
-    cast,
     CLSCTX_LOCAL_SERVER,
 )
 
