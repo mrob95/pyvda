@@ -83,7 +83,8 @@ def _check_version():
         )
 
 
-def GetCurrentDesktopNumber() -> int:
+# def GetCurrentDesktopNumber() -> int:
+def GetCurrentDesktopNumber():
     """
     Returns:
         int -- The number of the virtual desktop you're currently on, with the first being number 1 etc.
@@ -97,7 +98,8 @@ def GetCurrentDesktopNumber() -> int:
     return number + 1
 
 
-def GetDesktopCount() -> int:
+# def GetDesktopCount() -> int:
+def GetDesktopCount():
     """
     Returns:
         int -- The number of virtual desktops active.
@@ -110,7 +112,8 @@ def GetDesktopCount() -> int:
     return count
 
 
-def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
+# def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
+def MoveWindowToDesktopNumber(hwnd, number):
     """
     Move a window to a different virtual desktop.
 
@@ -129,11 +132,11 @@ def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
     array = POINTER(IObjectArray)()
     pManagerInternal.GetDesktops(array)
     if number <= 0:
-        raise ValueError(f"Desktop number must be at least 1, {number} provided")
+        raise ValueError("Desktop number must be at least 1, %s provided" % number)
     desktop_count = array.GetCount()
     if number > desktop_count:
         raise ValueError(
-            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
+            "Desktop number %s exceeds the number of desktops, %s." % (number, desktop_count),
         )
     desktop = POINTER(IVirtualDesktop)()
     # -1 to get correct index
@@ -142,7 +145,8 @@ def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
     pManagerInternal.MoveViewToDesktop(pApplicationView, desktop)
 
 
-def GoToDesktopNumber(number: int) -> None:
+# def GoToDesktopNumber(number: int) -> None:
+def GoToDesktopNumber(number):
     """
     Switch to a different virtual desktop.
 
@@ -155,11 +159,11 @@ def GoToDesktopNumber(number: int) -> None:
     pManagerInternal.GetDesktops(array)
 
     if number <= 0:
-        raise ValueError(f"Desktop number must be at least 1, {number} provided")
+        raise ValueError("Desktop number must be at least 1, %s provided" % number)
     desktop_count = array.GetCount()
     if number > desktop_count:
         raise ValueError(
-            f"Desktop number {number} exceeds the number of desktops, {desktop_count}.",
+            "Desktop number %s exceeds the number of desktops, %s." % (number, desktop_count),
         )
 
     desktop = POINTER(IVirtualDesktop)()
@@ -167,7 +171,8 @@ def GoToDesktopNumber(number: int) -> None:
     pManagerInternal.SwitchDesktop(desktop)
 
 
-def GetWindowDesktopNumber(hwnd: int) -> int:
+# def GetWindowDesktopNumber(hwnd: int) -> int:
+def GetWindowDesktopNumber(hwnd):
     """
     Returns the number of the desktop which a particular window is on.
 
