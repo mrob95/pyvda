@@ -33,3 +33,14 @@ pyvda.GoToDesktopNumber(3)
 
 window_moved_to = pyvda.GetWindowDesktopNumber(current_window_handle)
 ```
+
+## Tips
+
+Sometimes, after calling `GoToDesktopNumber` the focus will remain on the window in the previous desktop. This is at least partially fixed by calling:
+```
+from ctypes import windll
+ASFW_ANY = -1
+windll.user32.AllowSetForegroundWindow(ASFW_ANY)
+```
+
+before any call to `GoToDesktopNumber`. More details [here](https://github.com/Ciantic/VirtualDesktopAccessor/issues/4) and [here](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-allowsetforegroundwindow).
