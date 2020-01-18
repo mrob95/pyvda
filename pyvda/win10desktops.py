@@ -1,3 +1,11 @@
+"""
+References:
+    * GUIDs, Interfaces: https://github.com/Ciantic/VirtualDesktopAccessor/blob/master/VirtualDesktopAccessor/Win10Desktops.h
+    * Service provider: https://docs.microsoft.com/en-us/dotnet/api/system.iserviceprovider?view=netframework-4.8
+    * Object array: https://docs.microsoft.com/en-us/windows/win32/api/objectarray/nn-objectarray-iobjectarray
+    * HSTRING: https://docs.microsoft.com/en-us/uwp/cpp-ref-for-winrt/hstring
+    * comtypes: http://svn.python.org/projects/ctypes/tags/comtypes-0.3.2/docs/com_interfaces.html
+"""
 from ctypes import c_ulonglong, POINTER, Structure, HRESULT
 from ctypes.wintypes import (
     UINT,

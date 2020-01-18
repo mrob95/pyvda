@@ -1,3 +1,7 @@
+"""
+References:
+    * https://github.com/Ciantic/VirtualDesktopAccessor/blob/master/VirtualDesktopAccessor/dllmain.h
+"""
 from ctypes import POINTER
 import platform
 from comtypes import (
