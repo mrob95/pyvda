@@ -26,8 +26,6 @@ from comtypes import (
     IID,
     STDMETHOD,
     COMMETHOD,
-    CoCreateInstance,
-    CLSCTX_LOCAL_SERVER,
 )
 
 CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")

@@ -5,13 +5,7 @@ References:
 from ctypes import POINTER
 import platform
 from comtypes import (
-    IUnknown,
-    GUID,
-    IID,
-    COMMETHOD,
-    CoInitialize,
     CoCreateInstance,
-    cast,
     CLSCTX_LOCAL_SERVER,
 )
 from .win10desktops import (
@@ -29,7 +23,6 @@ from .win10desktops import (
 
 
 def _get_vd_manager_internal():
-    CoInitialize()
     pServiceProvider = CoCreateInstance(
         CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
     )
