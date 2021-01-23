@@ -16,6 +16,13 @@ def GetDesktopCount() -> int:
 def MoveWindowToDesktopNumber(hwnd: int, number: int) -> None:
 def GoToDesktopNumber(number: int) -> None:
 def GetWindowDesktopNumber(hwnd: int) -> int:
+
+def PinWindow(hwnd: int) -> None:
+def UnPinWindow(hwnd: int) -> None:
+def IsPinnedWindow(hwnd: int) -> bool:
+def PinApp(hwnd: int) -> None:
+def UnPinApp(hwnd: int) -> None:
+def IsPinnedApp(hwnd: int) -> bool:
 ```
 
 Example usage:

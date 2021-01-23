@@ -2,23 +2,25 @@
 References:
     * https://github.com/Ciantic/VirtualDesktopAccessor/blob/master/VirtualDesktopAccessor/dllmain.h
 """
-from ctypes import POINTER
+from ctypes import POINTER, byref
+from ctypes.wintypes import BOOL, LPCWSTR, LPWSTR
 import platform
 from comtypes import (
     CoCreateInstance,
     CLSCTX_LOCAL_SERVER,
 )
 from .win10desktops import (
-    IVirtualDesktop,
+    CLSID_VirtualDesktopPinnedApps, IVirtualDesktop,
     IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
     IApplicationView,
+    IVirtualDesktopPinnedApps,
     IObjectArray,
     IApplicationViewCollection,
     IServiceProvider,
     CLSID_ImmersiveShell,
     CLSID_IVirtualDesktopManager,
-    CLSID_VirtualDesktopManagerInternal,
+    CLSID_VirtualDesktopManagerInternal, PWSTR,
 )
 
 
@@ -47,6 +49,30 @@ def _get_view_collection():
     )
     return pViewCollection
 
+def _get_application_view_for_hwnd(hwnd):
+    # Get the IApplicationView for the window
+    pViewCollection = _get_view_collection()
+    pView = POINTER(IApplicationView)()
+    pViewCollection.GetViewForHwnd(hwnd, pView)
+    return pView
+
+def _get_application_id_for_hwnd(hwnd):
+    pView = _get_application_view_for_hwnd(hwnd)
+    app_id = PWSTR()
+    pView.GetAppUserModelId(byref(app_id))
+    return app_id
+
+def _get_pinned_apps():
+    pServiceProvider = CoCreateInstance(
+        CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
+    )
+    pinnedApps = POINTER(IVirtualDesktopPinnedApps)()
+    pServiceProvider.QueryService(
+        CLSID_VirtualDesktopPinnedApps,
+        IVirtualDesktopPinnedApps._iid_,
+        pinnedApps
+    )
+    return pinnedApps
 
 def _get_desktop_by_id(id):
     pManagerInternal = _get_vd_manager_internal()
@@ -187,3 +213,91 @@ def GetWindowDesktopNumber(hwnd):
     desktop = _get_desktop_by_id(desktopId)
     desktop_number = _get_desktop_number(desktop) + 1
     return desktop_number
+
+
+# def PinWindow(hwnd: int) -> None:
+def PinWindow(hwnd):
+    """
+    Pin a window (corresponds to the 'show window on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of the window to pin, from e.g. win32gui.GetForegroundWindow().
+    """
+    pinnedApps = _get_pinned_apps()
+    pView = _get_application_view_for_hwnd(hwnd)
+    pinnedApps.PinView(pView)
+
+
+# def UnPinWindow(hwnd: int) -> None:
+def UnPinWindow(hwnd):
+    """
+    Unpin a window (corresponds to the 'show window on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of the window to unpin, from e.g. win32gui.GetForegroundWindow().
+    """
+    pinnedApps = _get_pinned_apps()
+    pView = _get_application_view_for_hwnd(hwnd)
+    pinnedApps.UnpinView(pView)
+
+
+# def IsPinnedWindow(hwnd: int) -> bool:
+def IsPinnedWindow(hwnd):
+    """
+    Check if a window is pinned (corresponds to the 'show window on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of the window to check, from e.g. win32gui.GetForegroundWindow().
+
+    Returns:
+        bool -- is the window pinned?.
+    """
+    pinnedApps = _get_pinned_apps()
+    pView = _get_application_view_for_hwnd(hwnd)
+    isPinned = BOOL()
+    pinnedApps.IsViewPinned(pView, byref(isPinned))
+    return isPinned
+
+
+# def PinApp(hwnd: int) -> None:
+def PinApp(hwnd):
+    """
+    Pin an app (corresponds to the 'show windows from this app on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of a window belonging to the app to pin, from e.g. win32gui.GetForegroundWindow().
+    """
+    pinnedApps = _get_pinned_apps()
+    app_id = _get_application_id_for_hwnd(hwnd)
+    pinnedApps.PinAppID(app_id)
+
+
+# def UnPinApp(hwnd: int) -> None:
+def UnPinApp(hwnd):
+    """
+    Unpin an app (corresponds to the 'show windows from this app on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of a window belonging to the app to unpin, from e.g. win32gui.GetForegroundWindow().
+    """
+    pinnedApps = _get_pinned_apps()
+    app_id = _get_application_id_for_hwnd(hwnd)
+    pinnedApps.UnpinAppID(app_id)
+
+
+# def IsPinnedApp(hwnd: int) -> bool:
+def IsPinnedApp(hwnd):
+    """
+    Check if an app is pinned (corresponds to the 'show windows from this app on all desktops' toggle).
+
+    Arguments:
+        hwnd {int} -- Handle of a window belonging to the app to check, from e.g. win32gui.GetForegroundWindow().
+
+    Returns:
+        bool -- is the app pinned?.
+    """
+    pinnedApps = _get_pinned_apps()
+    app_id = _get_application_id_for_hwnd(hwnd)
+    isPinned = BOOL()
+    pinnedApps.IsAppIdPinned(app_id, byref(isPinned))
+    return isPinned.value

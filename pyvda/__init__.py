@@ -4,4 +4,10 @@ from .desktopfunctions import (
     MoveWindowToDesktopNumber,
     GoToDesktopNumber,
     GetWindowDesktopNumber,
+    PinWindow,
+    UnPinWindow,
+    IsPinnedWindow,
+    PinApp,
+    UnPinApp,
+    IsPinnedApp,
 )
