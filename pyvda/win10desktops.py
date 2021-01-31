@@ -6,6 +6,7 @@ References:
     * HSTRING: https://docs.microsoft.com/en-us/uwp/cpp-ref-for-winrt/hstring
     * comtypes: http://svn.python.org/projects/ctypes/tags/comtypes-0.3.2/docs/com_interfaces.html
 """
+import sys
 from ctypes import c_ulonglong, POINTER, Structure, HRESULT
 from ctypes.wintypes import (
     UINT,
@@ -27,6 +28,12 @@ from comtypes import (
     STDMETHOD,
     COMMETHOD,
 )
+
+# See https://github.com/Ciantic/VirtualDesktopAccessor/issues/33
+# https://github.com/mzomparelli/zVirtualDesktop/wiki
+WINDOWS_BUILD = sys.getwindowsversion().build
+BUILD_OVER_20231 = WINDOWS_BUILD >= 20231
+
 
 CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")
 CLSID_VirtualDesktopManagerInternal = GUID("{C5E0CDCA-7B6E-41B2-9FC4-D93975CC467B}")
@@ -109,29 +116,13 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "SetShowInSwitchers", (UINT,)),
     STDMETHOD(HRESULT, "GetScaleFactor", (POINTER(UINT),)),
     STDMETHOD(HRESULT, "CanReceiveInput", (POINTER(BOOL),)),
-    STDMETHOD(
-        HRESULT,
-        "GetCompatibilityPolicyType",
-        (POINTER(APPLICATION_VIEW_COMPATIBILITY_POLICY),),
-    ),
-    STDMETHOD(
-        HRESULT, "SetCompatibilityPolicyType", (APPLICATION_VIEW_COMPATIBILITY_POLICY,)
-    ),
+    STDMETHOD(HRESULT, "GetCompatibilityPolicyType", (POINTER(APPLICATION_VIEW_COMPATIBILITY_POLICY),)),
+    STDMETHOD(HRESULT, "SetCompatibilityPolicyType", (APPLICATION_VIEW_COMPATIBILITY_POLICY,)),
     # STDMETHOD(HRESULT, "GetPositionPriority", (POINTER(POINTER(IShellPositionerPriority)),)),
     # STDMETHOD(HRESULT, "SetPositionPriority", (POINTER(IShellPositionerPriority),)),
-    STDMETHOD(
-        HRESULT,
-        "GetSizeConstraints",
-        (POINTER(IImmersiveMonitor), POINTER(SIZE), POINTER(SIZE),),
-    ),
-    STDMETHOD(
-        HRESULT, "GetSizeConstraintsForDpi", (UINT, POINTER(SIZE), POINTER(SIZE),)
-    ),
-    STDMETHOD(
-        HRESULT,
-        "SetSizeConstraintsForDpi",
-        (POINTER(UINT), POINTER(SIZE), POINTER(SIZE),),
-    ),
+    STDMETHOD(HRESULT, "GetSizeConstraints", (POINTER(IImmersiveMonitor), POINTER(SIZE), POINTER(SIZE))),
+    STDMETHOD(HRESULT, "GetSizeConstraintsForDpi", (UINT, POINTER(SIZE), POINTER(SIZE),)),
+    STDMETHOD(HRESULT, "SetSizeConstraintsForDpi", (POINTER(UINT), POINTER(SIZE), POINTER(SIZE))),
     # STDMETHOD(HRESULT, "QuerySizeConstraintsFromApp", ()),
     STDMETHOD(HRESULT, "OnMinSizePreferencesUpdated", (HWND,)),
     STDMETHOD(HRESULT, "ApplyOperation", (POINTER(IApplicationViewOperation),)),
@@ -157,52 +148,43 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "Unknown12", (POINTER(SIZE),)),
 ]
 
+if BUILD_OVER_20231:
+    GUID_IVirtualDesktop = GUID("{62FDF88B-11CA-4AFB-8BD8-2296DFAE49E2}")
+else:
+    GUID_IVirtualDesktop = GUID("{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}")
 
 # In registry: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}
 class IVirtualDesktop(IUnknown):
-    _iid_ = GUID("{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}")
+    _iid_ = GUID_IVirtualDesktop
     _methods_ = [
         STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
         COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
     ]
 
 
+if BUILD_OVER_20231:
+    GUID_IVirtualDesktopManagerInternal = GUID("{094AFE11-44F2-4BA0-976F-29A97E263EE0}")
+else:
+    GUID_IVirtualDesktopManagerInternal = GUID("{F31574D6-B682-4CDC-BD56-1827860ABEC6}")
+
 # HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{F31574D6-B682-4CDC-BD56-1827860ABEC6}
 class IVirtualDesktopManagerInternal(IUnknown):
-    _iid_ = GUID("{F31574D6-B682-4CDC-BD56-1827860ABEC6}")
+    _iid_ = GUID_IVirtualDesktopManagerInternal
     _methods_ = [
         COMMETHOD([], HRESULT, "GetCount", (["out"], POINTER(UINT), "pCount"),),
-        STDMETHOD(
-            HRESULT,
-            "MoveViewToDesktop",
-            (POINTER(IApplicationView), POINTER(IVirtualDesktop),),
-        ),
+        STDMETHOD(HRESULT, "MoveViewToDesktop",(POINTER(IApplicationView), POINTER(IVirtualDesktop))),
         # Since build 10240
-        STDMETHOD(
-            HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT),)
-        ),
+        STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
         STDMETHOD(HRESULT, "GetCurrentDesktop", (POINTER(POINTER(IVirtualDesktop)),)),
         STDMETHOD(HRESULT, "GetDesktops", (POINTER(POINTER(IObjectArray)),)),
-        STDMETHOD(
-            HRESULT,
-            "GetAdjacentDesktop",
-            (
-                POINTER(IVirtualDesktop),
-                AdjacentDesktop,
-                POINTER(POINTER(IVirtualDesktop)),
-            ),
-        ),
+        STDMETHOD(HRESULT, "GetAdjacentDesktop", (
+            POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
+        )),
         STDMETHOD(HRESULT, "SwitchDesktop", (POINTER(IVirtualDesktop),)),
         STDMETHOD(HRESULT, "CreateDesktopW", (POINTER(POINTER(IVirtualDesktop)),)),
-        STDMETHOD(
-            HRESULT,
-            "RemoveDesktop",
-            (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop),),
-        ),
+        STDMETHOD(HRESULT, "RemoveDesktop", (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop))),
         # Since build 10240
-        STDMETHOD(
-            HRESULT, "FindDesktop", (POINTER(GUID), POINTER(POINTER(IVirtualDesktop)))
-        ),
+        STDMETHOD(HRESULT, "FindDesktop", (POINTER(GUID), POINTER(POINTER(IVirtualDesktop)))),
     ]
 
 
@@ -237,32 +219,14 @@ class IApplicationViewCollection(IUnknown):
         # IApplicationViewCollection methods
         STDMETHOD(HRESULT, "GetViews", (POINTER(POINTER(IObjectArray)),)),
         STDMETHOD(HRESULT, "GetViewsByZOrder", (POINTER(POINTER(IObjectArray)),)),
-        STDMETHOD(
-            HRESULT,
-            "GetViewsByAppUserModelId",
-            (LPCWSTR, POINTER(POINTER(IObjectArray)),),
-        ),
-        STDMETHOD(
-            HRESULT, "GetViewForHwnd", (HWND, POINTER(POINTER(IApplicationView)))
-        ),
-        STDMETHOD(
-            HRESULT,
-            "GetViewForApplication",
-            (POINTER(IImmersiveApplication), POINTER(POINTER(IApplicationView))),
-        ),
-        STDMETHOD(
-            HRESULT,
-            "GetViewForAppUserModelId",
-            (LPCWSTR, POINTER(POINTER(IApplicationView))),
-        ),
+        STDMETHOD(HRESULT, "GetViewsByAppUserModelId", (LPCWSTR, POINTER(POINTER(IObjectArray)))),
+        STDMETHOD(HRESULT, "GetViewForHwnd", (HWND, POINTER(POINTER(IApplicationView)))),
+        STDMETHOD(HRESULT, "GetViewForApplication", (POINTER(IImmersiveApplication), POINTER(POINTER(IApplicationView)))),
+        STDMETHOD(HRESULT, "GetViewForAppUserModelId", (LPCWSTR, POINTER(POINTER(IApplicationView)))),
         STDMETHOD(HRESULT, "GetViewInFocus", (POINTER(POINTER(IApplicationView)),)),
         STDMETHOD(HRESULT, "Unknown1", (POINTER(POINTER(IApplicationView)),)),
         STDMETHOD(HRESULT, "RefreshCollection", ()),
-        STDMETHOD(
-            HRESULT,
-            "RegisterForApplicationViewChanges",
-            (POINTER(IApplicationViewChangeListener), POINTER(DWORD),),
-        ),
+        STDMETHOD(HRESULT, "RegisterForApplicationViewChanges", (POINTER(IApplicationViewChangeListener), POINTER(DWORD))),
         # Removed in 1809
         # STDMETHOD(HRESULT, "RegisterForApplicationViewPositionChanges", (POINTER(IApplicationViewChangeListener), POINTER(DWORD),)),
         STDMETHOD(HRESULT, "UnregisterForApplicationViewChanges", (DWORD,)),
