@@ -5,6 +5,9 @@ References:
     * Object array: https://docs.microsoft.com/en-us/windows/win32/api/objectarray/nn-objectarray-iobjectarray
     * HSTRING: https://docs.microsoft.com/en-us/uwp/cpp-ref-for-winrt/hstring
     * comtypes: http://svn.python.org/projects/ctypes/tags/comtypes-0.3.2/docs/com_interfaces.html
+    * dev blogs:
+        * http://grabacr.net/archives/5601
+        * https://www.cyberforum.ru/blogs/105416/blog3671.html
 """
 import sys
 from ctypes import c_ulonglong, POINTER, Structure, HRESULT
@@ -24,7 +27,6 @@ from ctypes.wintypes import (
 from comtypes import (
     IUnknown,
     GUID,
-    IID,
     STDMETHOD,
     COMMETHOD,
 )
@@ -84,7 +86,6 @@ class IObjectArray(IUnknown):
 class IApplicationView(IUnknown):
     _iid_ = GUID("{372E1D3B-38D3-42E4-A15B-8AB2B178F513}")
 
-
 IApplicationView._methods_ = [
     # IInspectable methods
     STDMETHOD(HRESULT, "GetIids", (POINTER(ULONG), POINTER(POINTER(GUID)),)),
@@ -94,25 +95,27 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "SetFocus", ()),
     STDMETHOD(HRESULT, "SwitchTo", ()),
     STDMETHOD(HRESULT, "TryInvokeBack", (POINTER(IAsyncCallback),)),
-    STDMETHOD(HRESULT, "GetThumbnailWindow", (POINTER(HWND),)),
+    COMMETHOD([], HRESULT, "GetThumbnailWindow", (["out"], POINTER(HWND), "hwnd")),
     STDMETHOD(HRESULT, "GetMonitor", (POINTER(POINTER(IImmersiveMonitor)),)),
-    STDMETHOD(HRESULT, "GetVisibility", (POINTER(UINT),)),
+    # STDMETHOD(HRESULT, "GetVisibility", (POINTER(UINT),)),
+    COMMETHOD([], HRESULT, "GetVisibility", (["out"], POINTER(UINT), "pVisible")),
     STDMETHOD(HRESULT, "SetCloak", (APPLICATION_VIEW_CLOAK_TYPE, UINT,)),
     STDMETHOD(HRESULT, "GetPosition", (REFIID, POINTER(LPVOID),)),
     STDMETHOD(HRESULT, "SetPosition", (POINTER(IApplicationViewPosition),)),
     STDMETHOD(HRESULT, "InsertAfterWindow", (HWND,)),
     STDMETHOD(HRESULT, "GetExtendedFramePosition", (POINTER(RECT),)),
-    STDMETHOD(HRESULT, "GetAppUserModelId", (POINTER(PWSTR),)),
+    # STDMETHOD(HRESULT, "GetAppUserModelId", (POINTER(PWSTR),)),
+    COMMETHOD([], HRESULT, "GetAppUserModelId", (["out"], POINTER(PWSTR), "pId")),
     STDMETHOD(HRESULT, "SetAppUserModelId", (LPCWSTR,)),
     STDMETHOD(HRESULT, "IsEqualByAppUserModelId", (LPCWSTR, POINTER(UINT),)),
     STDMETHOD(HRESULT, "GetViewState", (POINTER(UINT),)),
     STDMETHOD(HRESULT, "SetViewState", (UINT,)),
     STDMETHOD(HRESULT, "GetNeediness", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "GetLastActivationTimestamp", (POINTER(ULONGLONG),)),
+    COMMETHOD([], HRESULT, "GetLastActivationTimestamp", (["out"], POINTER(ULONGLONG), "pGuid")),
     STDMETHOD(HRESULT, "SetLastActivationTimestamp", (ULONGLONG,)),
     COMMETHOD([], HRESULT, "GetVirtualDesktopId", (["out"], POINTER(GUID), "pGuid")),
     STDMETHOD(HRESULT, "SetVirtualDesktopId", (REFGUID,)),
-    STDMETHOD(HRESULT, "GetShowInSwitchers", (POINTER(UINT),)),
+    COMMETHOD([], HRESULT, "GetShowInSwitchers", (["out"], POINTER(UINT), "pShown")),
     STDMETHOD(HRESULT, "SetShowInSwitchers", (UINT,)),
     STDMETHOD(HRESULT, "GetScaleFactor", (POINTER(UINT),)),
     STDMETHOD(HRESULT, "CanReceiveInput", (POINTER(BOOL),)),
@@ -172,11 +175,11 @@ class IVirtualDesktopManagerInternal(IUnknown):
     _iid_ = GUID_IVirtualDesktopManagerInternal
     _methods_ = [
         COMMETHOD([], HRESULT, "GetCount", (["out"], POINTER(UINT), "pCount"),),
-        STDMETHOD(HRESULT, "MoveViewToDesktop",(POINTER(IApplicationView), POINTER(IVirtualDesktop))),
+        STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
         # Since build 10240
         STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
         STDMETHOD(HRESULT, "GetCurrentDesktop", (POINTER(POINTER(IVirtualDesktop)),)),
-        STDMETHOD(HRESULT, "GetDesktops", (POINTER(POINTER(IObjectArray)),)),
+        COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
         STDMETHOD(HRESULT, "GetAdjacentDesktop", (
             POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
         )),
@@ -193,7 +196,11 @@ class IVirtualDesktopManagerInternal(IUnknown):
 class IVirtualDesktopManager(IUnknown):
     _iid_ = GUID("{A5CD92FF-29BE-454C-8D04-D82879FB3F1B}")
     _methods_ = [
-        STDMETHOD(HRESULT, "IsWindowOnCurrentVirtualDesktop", (HWND, POINTER(BOOL))),
+        COMMETHOD([], HRESULT, "IsWindowOnCurrentVirtualDesktop",
+            (["in"], HWND, "hwnd"),
+            (["out"], POINTER(BOOL), "isOnCurrent"),
+        ),
+        # STDMETHOD(HRESULT, "IsWindowOnCurrentVirtualDesktop", (HWND, POINTER(BOOL))),
         STDMETHOD(HRESULT, "GetWindowDesktopId", (HWND, POINTER(GUID))),
         STDMETHOD(HRESULT, "MoveWindowToDesktop", (HWND, REFGUID)),
     ]
@@ -203,10 +210,16 @@ class IVirtualDesktopPinnedApps(IUnknown):
     _iid_ = GUID("{4CE81583-1E4C-4632-A621-07A53543148F}")
     _methods_ = [
         # IVirtualDesktopPinnedApps methods
-        STDMETHOD(HRESULT, "IsAppIdPinned", (LPCWSTR, POINTER(BOOL))),
+        COMMETHOD([], HRESULT, "IsAppIdPinned",
+            (["in"], LPCWSTR, "appId"),
+            (["out"], POINTER(BOOL), "isPinned"),
+        ),
         STDMETHOD(HRESULT, "PinAppID", (LPCWSTR,)),
         STDMETHOD(HRESULT, "UnpinAppID", (LPCWSTR,)),
-        STDMETHOD(HRESULT, "IsViewPinned", (POINTER(IApplicationView), POINTER(BOOL))),
+        COMMETHOD([], HRESULT, "IsViewPinned",
+            (["in"], POINTER(IApplicationView), "pView"),
+            (["out"], POINTER(BOOL), "isPinned"),
+        ),
         STDMETHOD(HRESULT, "PinView", (POINTER(IApplicationView),)),
         STDMETHOD(HRESULT, "UnpinView", (POINTER(IApplicationView),)),
     ]
@@ -218,9 +231,13 @@ class IApplicationViewCollection(IUnknown):
     _methods_ = [
         # IApplicationViewCollection methods
         STDMETHOD(HRESULT, "GetViews", (POINTER(POINTER(IObjectArray)),)),
-        STDMETHOD(HRESULT, "GetViewsByZOrder", (POINTER(POINTER(IObjectArray)),)),
+        # STDMETHOD(HRESULT, "GetViewsByZOrder", (POINTER(POINTER(IObjectArray)),)),
+        COMMETHOD([], HRESULT, "GetViewsByZOrder", (["out"], POINTER(POINTER(IObjectArray)), "array")),
         STDMETHOD(HRESULT, "GetViewsByAppUserModelId", (LPCWSTR, POINTER(POINTER(IObjectArray)))),
-        STDMETHOD(HRESULT, "GetViewForHwnd", (HWND, POINTER(POINTER(IApplicationView)))),
+        COMMETHOD([], HRESULT, "GetViewForHwnd",
+            (["in"], HWND, "hwnd"),
+            (["out"], POINTER(POINTER(IApplicationView)), "pView")
+        ),
         STDMETHOD(HRESULT, "GetViewForApplication", (POINTER(IImmersiveApplication), POINTER(POINTER(IApplicationView)))),
         STDMETHOD(HRESULT, "GetViewForAppUserModelId", (LPCWSTR, POINTER(POINTER(IApplicationView)))),
         STDMETHOD(HRESULT, "GetViewInFocus", (POINTER(POINTER(IApplicationView)),)),

@@ -2,6 +2,7 @@
 References:
     * https://github.com/Ciantic/VirtualDesktopAccessor/blob/master/VirtualDesktopAccessor/dllmain.h
 """
+from datetime import datetime
 from ctypes import POINTER, byref
 from ctypes.wintypes import BOOL, LPCWSTR, LPWSTR
 import platform
@@ -20,64 +21,49 @@ from .win10desktops import (
     IServiceProvider,
     CLSID_ImmersiveShell,
     CLSID_IVirtualDesktopManager,
-    CLSID_VirtualDesktopManagerInternal, PWSTR,
+    CLSID_VirtualDesktopManagerInternal,
 )
 
+def _get_object(cls, clsid = None):
+    pServiceProvider = CoCreateInstance(
+        CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
+    )
+    pObject = POINTER(cls)()
+    pServiceProvider.QueryService(
+        clsid or cls._iid_,
+        cls._iid_,
+        pObject,
+    )
+    return pObject
+
+def _get_vd_manager():
+    return _get_object(IVirtualDesktopManager)
 
 def _get_vd_manager_internal():
-    pServiceProvider = CoCreateInstance(
-        CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
-    )
-    pManagerInternal = POINTER(IVirtualDesktopManagerInternal)()
-    pServiceProvider.QueryService(
-        CLSID_VirtualDesktopManagerInternal,
-        IVirtualDesktopManagerInternal._iid_,
-        pManagerInternal,
-    )
-    return pManagerInternal
-
+    return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
 
 def _get_view_collection():
-    pServiceProvider = CoCreateInstance(
-        CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
-    )
-    pViewCollection = POINTER(IApplicationViewCollection)()
-    pServiceProvider.QueryService(
-        IApplicationViewCollection._iid_,
-        IApplicationViewCollection._iid_,
-        pViewCollection,
-    )
-    return pViewCollection
+    return _get_object(IApplicationViewCollection)
+
+def _get_pinned_apps():
+    return _get_object(IVirtualDesktopPinnedApps, CLSID_VirtualDesktopPinnedApps)
+
 
 def _get_application_view_for_hwnd(hwnd):
     # Get the IApplicationView for the window
     pViewCollection = _get_view_collection()
-    pView = POINTER(IApplicationView)()
-    pViewCollection.GetViewForHwnd(hwnd, pView)
+    pView = pViewCollection.GetViewForHwnd(hwnd)
     return pView
 
 def _get_application_id_for_hwnd(hwnd):
     pView = _get_application_view_for_hwnd(hwnd)
-    app_id = PWSTR()
-    pView.GetAppUserModelId(byref(app_id))
+    app_id = pView.GetAppUserModelId()
     return app_id
 
-def _get_pinned_apps():
-    pServiceProvider = CoCreateInstance(
-        CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
-    )
-    pinnedApps = POINTER(IVirtualDesktopPinnedApps)()
-    pServiceProvider.QueryService(
-        CLSID_VirtualDesktopPinnedApps,
-        IVirtualDesktopPinnedApps._iid_,
-        pinnedApps
-    )
-    return pinnedApps
 
 def _get_desktop_by_id(id):
     pManagerInternal = _get_vd_manager_internal()
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    array = pManagerInternal.GetDesktops()
     for i in range(array.GetCount()):
         item = POINTER(IVirtualDesktop)()
         array.GetAt(i, IVirtualDesktop._iid_, item)
@@ -89,8 +75,7 @@ def _get_desktop_by_id(id):
 def _get_desktop_number(desktop):
     pManagerInternal = _get_vd_manager_internal()
     target_id = desktop.GetID()
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    array = pManagerInternal.GetDesktops()
     for i in range(array.GetCount()):
         item = POINTER(IVirtualDesktop)()
         array.GetAt(i, IVirtualDesktop._iid_, item)
@@ -129,8 +114,7 @@ def GetDesktopCount():
     """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    array = pManagerInternal.GetDesktops()
     count = array.GetCount()
     return count
 
@@ -146,14 +130,10 @@ def MoveWindowToDesktopNumber(hwnd, number):
     """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
-    pViewCollection = _get_view_collection()
-    # Get the IApplicationView for the window
-    pApplicationView = POINTER(IApplicationView)()
-    pViewCollection.GetViewForHwnd(hwnd, pApplicationView)
+    pApplicationView = _get_application_view_for_hwnd(hwnd)
 
     # Get the IVirtualDesktop for the target desktop
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    array = pManagerInternal.GetDesktops()
     if number <= 0:
         raise ValueError("Desktop number must be at least 1, %s provided" % number)
     desktop_count = array.GetCount()
@@ -178,8 +158,7 @@ def GoToDesktopNumber(number):
     """
     _check_version()
     pManagerInternal = _get_vd_manager_internal()
-    array = POINTER(IObjectArray)()
-    pManagerInternal.GetDesktops(array)
+    array = pManagerInternal.GetDesktops()
 
     if number <= 0:
         raise ValueError("Desktop number must be at least 1, %s provided" % number)
@@ -206,10 +185,8 @@ def GetWindowDesktopNumber(hwnd):
         int -- Its desktop number.
     """
     _check_version()
-    pViewCollection = _get_view_collection()
-    app = POINTER(IApplicationView)()
-    pViewCollection.GetViewForHwnd(hwnd, app)
-    desktopId = app.GetVirtualDesktopId()
+    pApplicationView = _get_application_view_for_hwnd(hwnd)
+    desktopId = pApplicationView.GetVirtualDesktopId()
     desktop = _get_desktop_by_id(desktopId)
     desktop_number = _get_desktop_number(desktop) + 1
     return desktop_number
@@ -254,8 +231,7 @@ def IsPinnedWindow(hwnd):
     """
     pinnedApps = _get_pinned_apps()
     pView = _get_application_view_for_hwnd(hwnd)
-    isPinned = BOOL()
-    pinnedApps.IsViewPinned(pView, byref(isPinned))
+    isPinned = pinnedApps.IsViewPinned(pView)
     return isPinned
 
 
@@ -298,6 +274,97 @@ def IsPinnedApp(hwnd):
     """
     pinnedApps = _get_pinned_apps()
     app_id = _get_application_id_for_hwnd(hwnd)
-    isPinned = BOOL()
-    pinnedApps.IsAppIdPinned(app_id, byref(isPinned))
-    return isPinned.value
+    isPinned = pinnedApps.IsAppIdPinned(app_id)
+    return isPinned
+
+
+# def ViewIsShownInSwitchers(hwnd: int) -> bool:
+def ViewIsShownInSwitchers(hwnd):
+    """
+    Arguments:
+        hwnd {int}
+
+    Returns:
+        bool -- is the app shown in the alt-tab view?
+    """
+    view = _get_application_view_for_hwnd(hwnd)
+    return bool(view.GetShowInSwitchers())
+
+
+# def ViewIsVisible(hwnd: int) -> bool:
+def ViewIsVisible(hwnd):
+    """
+    Arguments:
+        hwnd {int}
+
+    Returns:
+        bool -- is the app visible?
+    """
+    view = _get_application_view_for_hwnd(hwnd)
+    return bool(view.GetVisibility())
+
+
+# def ViewGetLastActivationTimestamp(hwnd: int) -> int:
+def ViewGetLastActivationTimestamp(hwnd):
+    """
+    Arguments:
+        hwnd {int}
+
+    Returns:
+        int -- last activation timestamp
+    """
+    view = _get_application_view_for_hwnd(hwnd)
+    return view.GetLastActivationTimestamp()
+
+# def ViewSetFocus(hwnd: int) -> int:
+def ViewSetFocus(hwnd):
+    """Focus a window
+
+    Arguments:
+        hwnd {int} -- Handle to the window to focus
+    """
+    view = _get_application_view_for_hwnd(hwnd)
+    return view.SetFocus()
+
+# def ViewSwitchTo(hwnd: int) -> int:
+def ViewSwitchTo(hwnd):
+    """Switch to a window. Behaves slightly differently to ViewSetFocus -
+    this is what is called when you use the alt-tab menu.
+
+    Arguments:
+        hwnd {int} -- Handle to the window to focus
+    """
+    view = _get_application_view_for_hwnd(hwnd)
+    return view.SwitchTo()
+
+
+# def ViewGetByZOrder(switcher_windows: bool = True, current_desktop: bool = True) -> List[int]:
+def ViewGetByZOrder(switcher_windows = True, current_desktop = True):
+    """Get a list of window handles, ordered by their Z position, with
+    the foreground window first.
+
+    Arguments:
+        switcher_windows {bool} -- Only include windows which appear in the alt-tab dialogue
+        current_desktop {bool} -- Only include windows which are on the current virtual desktop
+
+    Returns:
+        List[int] -- Window handles
+    """
+    collection = _get_view_collection()
+    vdm = _get_vd_manager()
+    views_arr = collection.GetViewsByZOrder()
+    result = []
+    for i in range(views_arr.GetCount()):
+        item = POINTER(IApplicationView)()
+        views_arr.GetAt(i, IApplicationView._iid_, item)
+        view = item.GetThumbnailWindow()
+
+        if switcher_windows and not item.GetShowInSwitchers():
+            continue
+        if current_desktop and not vdm.IsWindowOnCurrentVirtualDesktop(view):
+            continue
+
+        result.append(view)
+
+    return result
+

@@ -10,4 +10,10 @@ from .desktopfunctions import (
     PinApp,
     UnPinApp,
     IsPinnedApp,
+    ViewIsShownInSwitchers,
+    ViewIsVisible,
+    ViewGetByZOrder,
+    ViewGetLastActivationTimestamp,
+    ViewSetFocus,
+    ViewSwitchTo,
 )

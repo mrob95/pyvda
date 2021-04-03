@@ -23,6 +23,13 @@ def IsPinnedWindow(hwnd: int) -> bool:
 def PinApp(hwnd: int) -> None:
 def UnPinApp(hwnd: int) -> None:
 def IsPinnedApp(hwnd: int) -> bool:
+
+def ViewIsShownInSwitchers(hwnd: int) -> bool:
+def ViewIsVisible(hwnd: int) -> bool:
+def ViewGetLastActivationTimestamp(hwnd: int) -> int:
+def ViewSetFocus(hwnd: int) -> int:
+def ViewSwitchTo(hwnd: int) -> int:
+def ViewGetByZOrder(switcher_windows: bool = True, current_desktop: bool = True) -> List[int]:
 ```
 
 Example usage:
