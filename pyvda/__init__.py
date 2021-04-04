@@ -29,6 +29,9 @@ Example
 
     print("Going to desktop number 5")
     VirtualDesktop(5).go()
+
+    print("Pinning the current window")
+    AppView.current().pin()
 """
 
 import platform
