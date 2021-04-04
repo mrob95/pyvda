@@ -24,6 +24,7 @@ from ctypes.wintypes import (
     SIZE,
     DWORD,
 )
+from typing import Any, Iterator
 from comtypes import (
     IUnknown,
     GUID,
@@ -80,6 +81,15 @@ class IObjectArray(IUnknown):
         STDMETHOD(HRESULT, "GetAt", (UINT, REFIID, POINTER(LPVOID),)),
     ]
 
+    def get_at(self, i: int, cls: Any) -> Any:
+        item = POINTER(cls)()
+        self.GetAt(i, cls._iid_, item)
+        return item
+
+    def iter(self, cls: Any) -> Iterator[Any]:
+        for i in range(self.GetCount()):
+            yield self.get_at(i, cls)
+
 
 # Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{372E1D3B-38D3-42E4-A15B-8AB2B178F513}
 # Found with searching "IApplicationView"
@@ -97,14 +107,12 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "TryInvokeBack", (POINTER(IAsyncCallback),)),
     COMMETHOD([], HRESULT, "GetThumbnailWindow", (["out"], POINTER(HWND), "hwnd")),
     STDMETHOD(HRESULT, "GetMonitor", (POINTER(POINTER(IImmersiveMonitor)),)),
-    # STDMETHOD(HRESULT, "GetVisibility", (POINTER(UINT),)),
     COMMETHOD([], HRESULT, "GetVisibility", (["out"], POINTER(UINT), "pVisible")),
     STDMETHOD(HRESULT, "SetCloak", (APPLICATION_VIEW_CLOAK_TYPE, UINT,)),
     STDMETHOD(HRESULT, "GetPosition", (REFIID, POINTER(LPVOID),)),
     STDMETHOD(HRESULT, "SetPosition", (POINTER(IApplicationViewPosition),)),
     STDMETHOD(HRESULT, "InsertAfterWindow", (HWND,)),
     STDMETHOD(HRESULT, "GetExtendedFramePosition", (POINTER(RECT),)),
-    # STDMETHOD(HRESULT, "GetAppUserModelId", (POINTER(PWSTR),)),
     COMMETHOD([], HRESULT, "GetAppUserModelId", (["out"], POINTER(PWSTR), "pId")),
     STDMETHOD(HRESULT, "SetAppUserModelId", (LPCWSTR,)),
     STDMETHOD(HRESULT, "IsEqualByAppUserModelId", (LPCWSTR, POINTER(UINT),)),
@@ -178,7 +186,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
         STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
         # Since build 10240
         STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
-        STDMETHOD(HRESULT, "GetCurrentDesktop", (POINTER(POINTER(IVirtualDesktop)),)),
+        COMMETHOD([], HRESULT, "GetCurrentDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
         COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
         STDMETHOD(HRESULT, "GetAdjacentDesktop", (
             POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
@@ -200,7 +208,6 @@ class IVirtualDesktopManager(IUnknown):
             (["in"], HWND, "hwnd"),
             (["out"], POINTER(BOOL), "isOnCurrent"),
         ),
-        # STDMETHOD(HRESULT, "IsWindowOnCurrentVirtualDesktop", (HWND, POINTER(BOOL))),
         STDMETHOD(HRESULT, "GetWindowDesktopId", (HWND, POINTER(GUID))),
         STDMETHOD(HRESULT, "MoveWindowToDesktop", (HWND, REFGUID)),
     ]
@@ -240,7 +247,7 @@ class IApplicationViewCollection(IUnknown):
         ),
         STDMETHOD(HRESULT, "GetViewForApplication", (POINTER(IImmersiveApplication), POINTER(POINTER(IApplicationView)))),
         STDMETHOD(HRESULT, "GetViewForAppUserModelId", (LPCWSTR, POINTER(POINTER(IApplicationView)))),
-        STDMETHOD(HRESULT, "GetViewInFocus", (POINTER(POINTER(IApplicationView)),)),
+        COMMETHOD([], HRESULT, "GetViewInFocus", (["out"], POINTER(POINTER(IApplicationView)), "view")),
         STDMETHOD(HRESULT, "Unknown1", (POINTER(POINTER(IApplicationView)),)),
         STDMETHOD(HRESULT, "RefreshCollection", ()),
         STDMETHOD(HRESULT, "RegisterForApplicationViewChanges", (POINTER(IApplicationViewChangeListener), POINTER(DWORD))),

@@ -1,43 +1,43 @@
 import win32gui
-from pyvda import *
+from pyvda import AppView, VirtualDesktop, get_virtual_desktops
 
 def test_count():
-    count = GetDesktopCount()
+    count = len(get_virtual_desktops())
     assert 0 < count
     assert count < 30
 
 def test_current():
-    current = GetCurrentDesktopNumber()
+    current = VirtualDesktop.current().number
     assert 0 < current
     assert current < 30
 
-current_window_handle = win32gui.GetForegroundWindow()
-current_desktop_number = GetCurrentDesktopNumber()
+current_window = AppView.current()
+current_desktop = VirtualDesktop.current()
 
 def test_move():
-    MoveWindowToDesktopNumber(current_window_handle, 1)
+    current_window.move_to_desktop(VirtualDesktop(1))
 
 def test_go():
-    GoToDesktopNumber(1)
-    assert GetCurrentDesktopNumber() == 1
+    VirtualDesktop(1).go()
+    assert VirtualDesktop.current().number == 1
 
 def test_get_number():
-    assert GetWindowDesktopNumber(current_window_handle) == 1
+    assert current_window.desktop.number == 1
 
 def test_cleanup():
-    MoveWindowToDesktopNumber(current_window_handle, current_desktop_number)
-    GoToDesktopNumber(current_desktop_number)
+    current_window.move_to_desktop(current_desktop)
+    current_desktop.go()
 
 def test_pin_app():
-    assert not IsPinnedApp(current_window_handle)
-    PinApp(current_window_handle)
-    assert IsPinnedApp(current_window_handle)
-    UnPinApp(current_window_handle)
-    assert not IsPinnedApp(current_window_handle)
+    assert not current_window.is_app_pinned()
+    current_window.pin_app()
+    assert current_window.is_app_pinned()
+    current_window.unpin_app()
+    assert not current_window.is_app_pinned()
 
 def test_pin_window():
-    assert not IsPinnedWindow(current_window_handle)
-    PinWindow(current_window_handle)
-    assert IsPinnedWindow(current_window_handle)
-    UnPinWindow(current_window_handle)
-    assert not IsPinnedWindow(current_window_handle)
+    assert not current_window.is_pinned()
+    current_window.pin()
+    assert current_window.is_pinned()
+    current_window.unpin()
+    assert not current_window.is_pinned()
