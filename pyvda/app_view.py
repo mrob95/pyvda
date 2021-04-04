@@ -12,9 +12,21 @@ from .utils import (
 )
 
 class AppView():
+    """
+    A wrapper around an `IApplicationView` object exposing window functionality relating to:
+
+        * Setting focus
+        * Pinning and unpinning (making a window persistent across all virtual desktops)
+        * Moving a window between virtual desktops
+
+    """
+
     def __init__(self, hwnd: int = None, view: IApplicationView = None):
-        """
-        # TODO:
+        """One of the following parameters must be provided:
+
+        Args:
+            hwnd (int, optional): Handle to a window. Defaults to None.
+            view (IApplicationView, optional): An `IApplicationView` object. Defaults to None.
         """
         if hwnd:
             # Get the IApplicationView for the window
@@ -30,17 +42,13 @@ class AppView():
 
     @property
     def hwnd(self) -> int:
-        """
-        Returns:
-            int: This window's handle.
+        """This window's handle.
         """
         return self._view.GetThumbnailWindow()
 
     @property
     def app_id(self) -> int:
-        """
-        Returns:
-            int: The ID of this window's app.
+        """The ID of this window's app.
         """
         return self._view.GetAppUserModelId()
 
@@ -58,24 +66,17 @@ class AppView():
     #  IApplicationView methods
     #  ------------------------------------------------
     def is_shown_in_switchers(self) -> bool:
-        """
-        Returns:
-            bool: is the view shown in the alt-tab view?
+        """Is the view shown in the alt-tab view?
         """
         return bool(self._view.GetShowInSwitchers())
 
     def is_visible(self) -> bool:
-        """
-        Returns:
-            bool: is the view visible?
+        """Is the view visible?
         """
         return bool(self._view.GetVisibility())
 
     def get_activation_timestamp(self) -> int:
-        """Get the last activation for this window.
-
-        Returns:
-            int: last activation timestamp
+        """Get the last activation timestamp for this window.
         """
         return self._view.GetLastActivationTimestamp()
 
@@ -144,14 +145,16 @@ class AppView():
     #  ------------------------------------------------
     #  IVirtualDesktopManagerInternal methods
     #  ------------------------------------------------
-    def move_to_desktop(self, desktop: VirtualDesktop):
+    def move(self, desktop: VirtualDesktop):
         """Move the window to a different virtual desktop.
 
         Args:
             desktop (VirtualDesktop): Desktop to move the window to.
 
         Example:
-            AppView.current().move_to_desktop(VirtualDesktop(1))
+
+                >>> AppView.current().move_to_desktop(VirtualDesktop(1))
+
         """
         manager_internal = get_vd_manager_internal()
         manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)
@@ -180,14 +183,14 @@ class AppView():
             desktop (VirtualDesktop): Desktop to check
 
         Example:
-            AppView.current().is_on_desktop(VirtualDesktop(1))
+
+            >>> AppView.current().is_on_desktop(VirtualDesktop(1))
+
         """
         return self.desktop_id == desktop.id
 
     def is_on_current_desktop(self) -> bool:
-        """
-        Returns:
-            bool: Is this window on the current desktop?
+        """Is this window on the current desktop?
         """
         return self.is_on_desktop(VirtualDesktop.current())
 
