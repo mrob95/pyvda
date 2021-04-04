@@ -70,7 +70,7 @@ html_static_path = ['_static']
 from unittest.mock import Mock
 
 mock_modules = {
-    "comtypes", "ctypes", "ctypes.wintypes", "sys"
+    "comtypes", "ctypes", "ctypes.wintypes"
 }
 
 for module_name in mock_modules:
