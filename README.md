@@ -57,4 +57,4 @@ ASFW_ANY = -1
 windll.user32.AllowSetForegroundWindow(ASFW_ANY)
 ```
 
-before any call to `GoToDesktopNumber`. More details [here](https://github.com/Ciantic/VirtualDesktopAccessor/issues/4) and [here](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-allowsetforegroundwindow).
+before any call to `GoToDesktopNumber`.

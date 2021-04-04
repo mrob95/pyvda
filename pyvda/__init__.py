@@ -1,6 +1,5 @@
 import platform
 
-
 def _check_version():
     if platform.system() != "Windows" or platform.release() != "10":
         raise WindowsError(
@@ -9,25 +8,5 @@ def _check_version():
 
 _check_version()
 
-
-# from .desktopfunctions import (
-#     GetCurrentDesktopNumber,
-#     GetDesktopCount,
-#     MoveWindowToDesktopNumber,
-#     GoToDesktopNumber,
-#     GetWindowDesktopNumber,
-#     PinWindow,
-#     UnPinWindow,
-#     IsPinnedWindow,
-#     PinApp,
-#     UnPinApp,
-#     IsPinnedApp,
-#     ViewIsShownInSwitchers,
-#     ViewIsVisible,
-#     ViewGetByZOrder,
-#     ViewGetLastActivationTimestamp,
-#     ViewSetFocus,
-#     ViewSwitchTo,
-# )
-from .app_view import AppView
+from .app_view import AppView, get_apps_by_z_order
 from .desktop import VirtualDesktop, get_virtual_desktops

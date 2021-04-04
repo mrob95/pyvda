@@ -1,18 +1,11 @@
-"""
-References:
-    * https://github.com/Ciantic/VirtualDesktopAccessor/blob/master/VirtualDesktopAccessor/dllmain.h
-"""
-from ctypes import POINTER
 from typing import List
 
 from comtypes.GUID import GUID
 from .desktop import VirtualDesktop
 from .win10desktops import (
-    IVirtualDesktop,
     IApplicationView,
 )
 from .utils import (
-    get_vd_manager,
     get_vd_manager_internal,
     get_view_collection,
     get_pinned_apps,
@@ -32,24 +25,30 @@ class AppView():
         else:
             raise Exception(f"Must pass 'hwnd' or 'view'")
 
+    def __eq__(self, other):
+        return self.hwnd == other.hwnd
+
     @property
     def hwnd(self) -> int:
         """
-        # TODO:
+        Returns:
+            int: This window's handle.
         """
         return self._view.GetThumbnailWindow()
 
     @property
     def app_id(self) -> int:
         """
-        # TODO:
+        Returns:
+            int: The ID of this window's app.
         """
         return self._view.GetAppUserModelId()
 
     @classmethod
     def current(cls):
         """
-        # TODO:
+        Returns:
+            AppView: An AppView for the currently focused window.
         """
         view_collection = get_view_collection()
         focused = view_collection.GetViewInFocus()
@@ -61,24 +60,22 @@ class AppView():
     def is_shown_in_switchers(self) -> bool:
         """
         Returns:
-            bool -- is the view shown in the alt-tab view?
+            bool: is the view shown in the alt-tab view?
         """
         return bool(self._view.GetShowInSwitchers())
-
 
     def is_visible(self) -> bool:
         """
         Returns:
-            bool -- is the view visible?
+            bool: is the view visible?
         """
         return bool(self._view.GetVisibility())
 
-
-    def last_activation_timestamp(self) -> int:
+    def get_activation_timestamp(self) -> int:
         """Get the last activation for this window.
 
         Returns:
-            int -- last activation timestamp
+            int: last activation timestamp
         """
         return self._view.GetLastActivationTimestamp()
 
@@ -87,7 +84,7 @@ class AppView():
         return self._view.SetFocus()
 
     def switch_to(self):
-        """Switch to the window. Behaves slightly differently to ViewSetFocus -
+        """Switch to the window. Behaves slightly differently to set_focus -
         this is what is called when you use the alt-tab menu."""
         return self._view.SwitchTo()
 
@@ -111,10 +108,10 @@ class AppView():
 
     def is_pinned(self) -> bool:
         """
-        Check if a window is pinned (corresponds to the 'show window on all desktops' toggle).
+        Check if this window is pinned (corresponds to the 'show window on all desktops' toggle).
 
         Returns:
-            bool -- is the window pinned?.
+            bool: is the window pinned?
         """
         pinnedApps = get_pinned_apps()
         return pinnedApps.IsViewPinned(self._view)
@@ -138,7 +135,7 @@ class AppView():
         Check if this window's app is pinned (corresponds to the 'show windows from this app on all desktops' toggle).
 
         Returns:
-            bool -- is the app pinned?.
+            bool: is the app pinned?.
         """
         pinnedApps = get_pinned_apps()
         return pinnedApps.IsAppIdPinned(self.app_id)
@@ -148,12 +145,13 @@ class AppView():
     #  IVirtualDesktopManagerInternal methods
     #  ------------------------------------------------
     def move_to_desktop(self, desktop: VirtualDesktop):
-        """
-        Move the window to a different virtual desktop.
+        """Move the window to a different virtual desktop.
 
-        # TODO:
-        Arguments:
-            number {int} -- Desktop number to move the window to, between 1 and the number of desktops active.
+        Args:
+            desktop (VirtualDesktop): Desktop to move the window to.
+
+        Example:
+            AppView.current().move_to_desktop(VirtualDesktop(1))
         """
         manager_internal = get_vd_manager_internal()
         manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)
@@ -161,50 +159,51 @@ class AppView():
     @property
     def desktop_id(self) -> GUID:
         """
-        # TODO:
-        Returns the number of the desktop which the window is on.
-
         Returns:
-            int -- Its desktop number.
+            GUID -- The ID of the desktop which the window is on.
         """
         return self._view.GetVirtualDesktopId()
 
     @property
     def desktop(self) -> VirtualDesktop:
         """
-        # TODO:
-        Returns the number of the desktop which the window is on.
-
         Returns:
-            int -- Its desktop number.
+            VirtualDesktop: The virtual desktop which this window is on.
         """
         return VirtualDesktop(desktop_id=self.desktop_id)
 
+
     def is_on_desktop(self, desktop: VirtualDesktop) -> bool:
-        """
-        # TODO:
+        """Is this window on the passed virtual desktop?
+
+        Args:
+            desktop (VirtualDesktop): Desktop to check
+
+        Example:
+            AppView.current().is_on_desktop(VirtualDesktop(1))
         """
         return self.desktop_id == desktop.id
 
     def is_on_current_desktop(self) -> bool:
         """
-        # TODO:
+        Returns:
+            bool: Is this window on the current desktop?
         """
         return self.is_on_desktop(VirtualDesktop.current())
 
 
 def get_apps_by_z_order(switcher_windows: bool = True, current_desktop: bool = True) -> List[AppView]:
-    """Get a list of window handles, ordered by their Z position, with
+    """Get a list of AppViews, ordered by their Z position, with
     the foreground window first.
 
-    Arguments:
-        switcher_windows {bool} -- Only include windows which appear in the alt-tab dialogue
-        current_desktop {bool} -- Only include windows which are on the current virtual desktop
+    Args:
+        switcher_windows (bool, optional): Only include windows which appear in the alt-tab dialogue. Defaults to True.
+        current_desktop (bool, optional): Only include windows which are on the current virtual desktop. Defaults to True.
 
     Returns:
-        List[int] -- Window handles
+        List[AppView]: AppViews matching the specified criteria.
     """
-    collection = _get_view_collection()
+    collection = get_view_collection()
     views_arr = collection.GetViewsByZOrder()
     all_views = [AppView(view=v) for v in views_arr.iter(IApplicationView)]
     if not switcher_windows and not current_desktop:

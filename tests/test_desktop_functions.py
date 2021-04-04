@@ -1,15 +1,6 @@
+from pyvda import AppView, VirtualDesktop, get_virtual_desktops, get_apps_by_z_order
+import time
 import win32gui
-from pyvda import AppView, VirtualDesktop, get_virtual_desktops
-
-def test_count():
-    count = len(get_virtual_desktops())
-    assert 0 < count
-    assert count < 30
-
-def test_current():
-    current = VirtualDesktop.current().number
-    assert 0 < current
-    assert current < 30
 
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
@@ -41,3 +32,39 @@ def test_pin_window():
     assert current_window.is_pinned()
     current_window.unpin()
     assert not current_window.is_pinned()
+
+def test_z_order():
+    apps = get_apps_by_z_order()
+    assert apps[0] == AppView.current()
+
+    assert len(get_apps_by_z_order(False, False)) > len(apps)
+
+def test_switch_focus():
+    apps = get_apps_by_z_order()
+    if len(apps) == 1:
+        raise Exception("For testing purposes, open another window!")
+
+    ts = apps[0].get_activation_timestamp()
+
+    apps[1].set_focus()
+    time.sleep(1)
+    assert AppView.current() == apps[1]
+    apps[0].switch_to()
+    time.sleep(1)
+    assert AppView.current() == apps[0]
+
+    assert apps[0].get_activation_timestamp() > ts
+
+def test_visibility():
+    cur = AppView.current()
+    assert cur.is_shown_in_switchers()
+    assert cur.is_visible()
+
+def test_current():
+    count = len(get_virtual_desktops())
+    current = VirtualDesktop.current().number
+    assert 0 < current < count
+
+    hwnd = win32gui.GetForegroundWindow()
+    assert AppView(hwnd) == AppView.current()
+    assert AppView(hwnd).is_on_current_desktop()
