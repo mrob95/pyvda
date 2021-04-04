@@ -1,26 +1,16 @@
-from ctypes import POINTER, byref
-
-from datetime import datetime
-from ctypes import POINTER, byref
-from ctypes.wintypes import BOOL, LPCWSTR, LPWSTR
-import platform
-from typing import Iterator
+from ctypes import POINTER
 from comtypes import (
     CoCreateInstance,
     CLSCTX_LOCAL_SERVER,
-    IUnknown,
 )
 from .win10desktops import (
-    CLSID_VirtualDesktopPinnedApps, IVirtualDesktop,
+    CLSID_VirtualDesktopPinnedApps,
     IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
-    IApplicationView,
     IVirtualDesktopPinnedApps,
-    IObjectArray,
     IApplicationViewCollection,
     IServiceProvider,
     CLSID_ImmersiveShell,
-    CLSID_IVirtualDesktopManager,
     CLSID_VirtualDesktopManagerInternal,
 )
 

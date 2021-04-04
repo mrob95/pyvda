@@ -1,10 +1,8 @@
 from typing import List
 
-from comtypes.GUID import GUID
+from comtypes import GUID
 from .desktop import VirtualDesktop
-from .win10desktops import (
-    IApplicationView,
-)
+from .win10desktops import IApplicationView
 from .utils import (
     get_vd_manager_internal,
     get_view_collection,
@@ -21,7 +19,7 @@ class AppView():
 
     """
 
-    def __init__(self, hwnd: int = None, view: IApplicationView = None):
+    def __init__(self, hwnd: int = None, view: 'IApplicationView' = None):
         """One of the following parameters must be provided:
 
         Args:

@@ -6,7 +6,7 @@ current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
 
 def test_move():
-    current_window.move_to_desktop(VirtualDesktop(1))
+    current_window.move(VirtualDesktop(1))
 
 def test_go():
     VirtualDesktop(1).go()
@@ -16,7 +16,7 @@ def test_get_number():
     assert current_window.desktop.number == 1
 
 def test_cleanup():
-    current_window.move_to_desktop(current_desktop)
+    current_window.move(current_desktop)
     current_desktop.go()
 
 def test_pin_app():

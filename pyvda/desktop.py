@@ -1,6 +1,6 @@
 from typing import List
 from ctypes import windll
-from comtypes.GUID import GUID
+from comtypes import GUID
 
 from .win10desktops import IVirtualDesktop
 from .utils import get_vd_manager_internal
@@ -15,7 +15,7 @@ class VirtualDesktop():
         self,
         number: int = None,
         desktop_id: GUID = None,
-        desktop: IVirtualDesktop = None,
+        desktop: 'IVirtualDesktop' = None,
         current: bool = False
     ):
         """One of the following arguments must be provided:
