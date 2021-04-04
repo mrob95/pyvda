@@ -1,12 +1,13 @@
 from setuptools import setup, find_packages
 import os
+import pyvda
 
 def read(*names):
     return open(os.path.join(os.path.dirname(__file__), *names)).read()
 
 setup(
     name="pyvda",
-    version=read("version.txt"),
+    version=pyvda.__version__,
     description="Python implementation of the VirtualDesktopAccessor for manipulating Windows 10 virtual desktops.",
     author="Mike Roberts",
     author_email="mike.roberts.2k10@googlemail.com",
