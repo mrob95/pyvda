@@ -105,6 +105,9 @@ class VirtualDesktop():
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
         self._manager_internal.SwitchDesktop(self._virtual_desktop)
 
+    # TODO: List windows on this desktop?
+    # would be similar to get_by_z
+
 
 def get_virtual_desktops() -> List[VirtualDesktop]:
     """Return a list of all current virtual desktops, one for each desktop visible in the task view.

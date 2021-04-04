@@ -1,6 +1,8 @@
-# py-VirtualDesktopAccessor
+# Python Virtual Desktop Accessor
+Python module providing programmatic access to most of the settings accessed through the [Windows 10 task view](https://en.wikipedia.org/wiki/Task_View).
+Including switching virtual desktops, moving windows between virtual desktops, pinning windows and listing the windows on a desktop.
 
-Implements a subset of the functionality offered by https://github.com/Ciantic/VirtualDesktopAccessor, written in pure Python and installable via pip.
+Originally based on https://github.com/Ciantic/VirtualDesktopAccessor.
 
 ## Installation
 ```
@@ -30,15 +32,4 @@ AppView.current().pin()
 ```
 
 ## Documentation
-Full API documentation can be found at
-
-## Tips
-
-Sometimes, after calling `GoToDesktopNumber` the focus will remain on the window in the previous desktop. This is at least partially fixed by calling:
-```
-from ctypes import windll
-ASFW_ANY = -1
-windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-```
-
-before any call to `GoToDesktopNumber`.
+Full API documentation can be found at [Read the Docs](https://pyvda.readthedocs.io/en/latest/index.html)
