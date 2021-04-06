@@ -199,7 +199,9 @@ class IVirtualDesktopManagerInternal(IUnknown):
         STDMETHOD(HRESULT, "CreateDesktopW", (POINTER(POINTER(IVirtualDesktop)),)),
         STDMETHOD(HRESULT, "RemoveDesktop", (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop))),
         # Since build 10240
-        STDMETHOD(HRESULT, "FindDesktop", (POINTER(GUID), POINTER(POINTER(IVirtualDesktop)))),
+        COMMETHOD([], HRESULT, "FindDesktop",
+        (["in"], POINTER(GUID), "pGuid"),
+        (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop")),
     ]
 
 

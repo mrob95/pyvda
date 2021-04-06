@@ -3,7 +3,7 @@ from comtypes import (
     CoCreateInstance,
     CLSCTX_LOCAL_SERVER,
 )
-from .win10desktops import (
+from .com_defns import (
     CLSID_VirtualDesktopPinnedApps,
     IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
