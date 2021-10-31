@@ -1,5 +1,6 @@
 from ctypes import POINTER
 from comtypes import (
+    CoInitialize,
     CoCreateInstance,
     CLSCTX_LOCAL_SERVER,
 )
@@ -16,6 +17,7 @@ from .win10desktops import (
 
 
 def _get_object(cls, clsid = None):
+    CoInitialize()
     pServiceProvider = CoCreateInstance(
         CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
     )
