@@ -1,4 +1,5 @@
 
-VERSION=$(python3 -c "import pyvda; print(pyvda.__version__)")
+VERSION=$(python -c "import pyvda; print(pyvda.__version__)")
 
-git tag -a v$VERSION
+git tag v$VERSION
+git push origin v$VERSION
