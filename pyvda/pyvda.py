@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import sys
 from typing import List
 
 from comtypes import GUID
@@ -12,7 +14,16 @@ from .utils import (
     get_pinned_apps,
 )
 
+if not os.getenv("READTHEDOCS"):
+    # See https://github.com/Ciantic/VirtualDesktopAccessor/issues/33
+    # https://github.com/mzomparelli/zVirtualDesktop/wiki
+    WINDOWS_BUILD = sys.getwindowsversion().build
+    BUILD_OVER_20231 = WINDOWS_BUILD >= 20231
+else:
+    BUILD_OVER_20231 = False
+
 ASFW_ANY = -1
+NULL_PTR = 0
 
 class AppView():
     """
@@ -256,7 +267,10 @@ class VirtualDesktop():
         if number:
             if number <= 0:
                 raise ValueError(f"Desktop number must be at least 1, {number} provided")
-            array = self._manager_internal.GetDesktops()
+            if BUILD_OVER_20231:
+                array = self._manager_internal.GetDesktops(NULL_PTR)
+            else:
+                array = self._manager_internal.GetDesktops()
             desktop_count = array.GetCount()
             if number > desktop_count:
                 raise ValueError(
@@ -271,7 +285,10 @@ class VirtualDesktop():
             self._virtual_desktop = desktop
 
         elif current:
-            self._virtual_desktop = self._manager_internal.GetCurrentDesktop()
+            if BUILD_OVER_20231:
+                self._virtual_desktop = self._manager_internal.GetCurrentDesktop(NULL_PTR)
+            else:
+                self._virtual_desktop = self._manager_internal.GetCurrentDesktop()
 
         else:
             raise Exception("Must provide one of 'number', 'desktop_id' or 'desktop'")
@@ -304,7 +321,10 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        array = self._manager_internal.GetDesktops()
+        if BUILD_OVER_20231:
+            array = self._manager_internal.GetDesktops(NULL_PTR)
+        else:
+            array = self._manager_internal.GetDesktops()
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
@@ -322,7 +342,10 @@ class VirtualDesktop():
         """
         if allow_set_foreground:
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-        self._manager_internal.SwitchDesktop(self._virtual_desktop)
+        if BUILD_OVER_20231:
+            self._manager_internal.SwitchDesktop(NULL_PTR, self._virtual_desktop)
+        else:
+            self._manager_internal.SwitchDesktop(self._virtual_desktop)
 
     def apps_by_z_order(self, include_pinned: bool = True) -> List[AppView]:
         """Get a list of AppViews, ordered by their Z position, with
@@ -352,6 +375,9 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
         List[VirtualDesktop]: Virtual desktops currently active.
     """
     manager_internal = get_vd_manager_internal()
-    array = manager_internal.GetDesktops()
+    if BUILD_OVER_20231:
+        array = manager_internal.GetDesktops(NULL_PTR)
+    else:
+        array = manager_internal.GetDesktops()
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
 

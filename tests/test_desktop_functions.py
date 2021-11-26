@@ -63,7 +63,7 @@ def test_visibility():
 def test_current():
     count = len(get_virtual_desktops())
     current = VirtualDesktop.current().number
-    assert 0 < current < count
+    assert 0 < current <= count
 
     hwnd = win32gui.GetForegroundWindow()
     assert AppView(hwnd) == AppView.current()
