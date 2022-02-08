@@ -303,6 +303,17 @@ class VirtualDesktop():
         """
         return cls(current=True)
 
+    @classmethod
+    def create(cls):
+        """Create a new virtual desktop.
+
+        Returns:
+            VirtualDesktop: The created desktop.
+        """
+
+        _manager_internal = get_vd_manager_internal()
+
+        return cls(desktop=_manager_internal.CreateDesktopW())
 
     @property
     def id(self) -> GUID:
