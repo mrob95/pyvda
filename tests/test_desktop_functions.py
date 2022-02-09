@@ -68,3 +68,11 @@ def test_current():
     hwnd = win32gui.GetForegroundWindow()
     assert AppView(hwnd) == AppView.current()
     assert AppView(hwnd).is_on_current_desktop()
+
+def test_new_desktop():
+    old_count = len(get_virtual_desktops())
+    new = VirtualDesktop.create()
+    new_count = len(get_virtual_desktops())
+    assert new_count == old_count + 1
+    new.go()
+    current_desktop.go()
