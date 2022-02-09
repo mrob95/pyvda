@@ -203,7 +203,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
                 POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
             )),
             STDMETHOD(HRESULT, "SwitchDesktop", (HWND, POINTER(IVirtualDesktop),)),
-            STDMETHOD(HRESULT, "CreateDesktopW", (HWND, POINTER(POINTER(IVirtualDesktop)),)),
+            COMMETHOD([], HRESULT, "CreateDesktopW", (["in"], HWND, "hwnd"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), HWND, INT)),
             STDMETHOD(HRESULT, "RemoveDesktop", (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop))),
             # Since build 10240
@@ -223,7 +223,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
                 POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
             )),
             STDMETHOD(HRESULT, "SwitchDesktop", (HWND, POINTER(IVirtualDesktop),)),
-            STDMETHOD(HRESULT, "CreateDesktopW", (HWND, POINTER(POINTER(IVirtualDesktop)),)),
+            COMMETHOD([], HRESULT, "CreateDesktopW", (["in"], HWND, "hwnd"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "RemoveDesktop", (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop))),
             # Since build 10240
             COMMETHOD([], HRESULT, "FindDesktop",
@@ -242,7 +242,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
                 POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),
             )),
             STDMETHOD(HRESULT, "SwitchDesktop", (POINTER(IVirtualDesktop),)),
-            STDMETHOD(HRESULT, "CreateDesktopW", (POINTER(POINTER(IVirtualDesktop)),)),
+            COMMETHOD([], HRESULT, "CreateDesktopW", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "RemoveDesktop", (POINTER(IVirtualDesktop), POINTER(IVirtualDesktop))),
             # Since build 10240
             COMMETHOD([], HRESULT, "FindDesktop",
