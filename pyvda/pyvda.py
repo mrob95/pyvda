@@ -311,9 +311,14 @@ class VirtualDesktop():
             VirtualDesktop: The created desktop.
         """
 
-        _manager_internal = get_vd_manager_internal()
+        manager_internal = get_vd_manager_internal()
 
-        return cls(desktop=_manager_internal.CreateDesktopW())
+        if BUILD_OVER_20231:
+            desktop = manager_internal.CreateDesktopW(NULL_PTR)
+        else:
+            desktop = manager_internal.CreateDesktopW()
+
+        return cls(desktop=desktop)
 
     @property
     def id(self) -> GUID:
