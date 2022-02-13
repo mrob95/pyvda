@@ -69,10 +69,26 @@ def test_current():
     assert AppView(hwnd) == AppView.current()
     assert AppView(hwnd).is_on_current_desktop()
 
-def test_new_desktop():
+def test_create_and_remove_desktop():
     old_count = len(get_virtual_desktops())
     new = VirtualDesktop.create()
     new_count = len(get_virtual_desktops())
     assert new_count == old_count + 1
     new.go()
+
+    new.remove(VirtualDesktop(1))
+    new_count = len(get_virtual_desktops())
+    assert new_count == old_count
+    fellback = VirtualDesktop.current().number
+    assert fellback == 1
+
+    time.sleep(1) # Got to wait for the animation before we can return
     current_desktop.go()
+
+def test_desktop_names():
+    current_name = current_desktop.name
+    test_name = "pyvda testing"
+    current_desktop.rename(test_name)
+    assert current_desktop.name == test_name
+    current_desktop.rename(current_name)
+    assert current_desktop.name == current_name
