@@ -344,6 +344,9 @@ class VirtualDesktop():
         Returns:
             str: The desktop name.
         """
+        if BUILD_OVER_21313:
+            return str(self._virtual_desktop.GetName())
+
         array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
         for vd in array.iter(IVirtualDesktop2):
             if self.id == vd.GetID():
