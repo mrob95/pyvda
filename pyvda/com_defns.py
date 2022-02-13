@@ -32,6 +32,7 @@ from comtypes import (
     STDMETHOD,
     COMMETHOD,
 )
+from .winstring import HSTRING
 
 if not os.getenv("READTHEDOCS"):
     # See https://github.com/Ciantic/VirtualDesktopAccessor/issues/33
@@ -67,10 +68,6 @@ ULONGLONG = c_ulonglong
 PWSTR = POINTER(WCHAR)
 REFGUID = POINTER(GUID)
 REFIID = POINTER(GUID)
-
-
-class HSTRING(Structure):
-    _fields_ = [("value", WCHAR), ("size", UINT)]
 
 
 class IServiceProvider(IUnknown):
