@@ -8,6 +8,7 @@ from .com_defns import (
     CLSID_VirtualDesktopPinnedApps,
     IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
+    IVirtualDesktopManagerInternal2,
     IVirtualDesktopPinnedApps,
     IApplicationViewCollection,
     IServiceProvider,
@@ -34,6 +35,9 @@ def get_vd_manager():
 
 def get_vd_manager_internal():
     return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
+
+def get_vd_manager_internal2():
+    return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal)
 
 def get_view_collection():
     return _get_object(IApplicationViewCollection)

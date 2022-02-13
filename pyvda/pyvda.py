@@ -7,20 +7,20 @@ from typing import List
 from comtypes import GUID
 from ctypes import windll
 
-from .com_defns import IApplicationView, IVirtualDesktop
+from .winstring import HSTRING
+from .com_defns import (
+    IApplicationView,
+    IVirtualDesktop,
+    IVirtualDesktop2,
+    BUILD_OVER_20231,
+    BUILD_OVER_21313,
+)
 from .utils import (
     get_vd_manager_internal,
+    get_vd_manager_internal2,
     get_view_collection,
     get_pinned_apps,
 )
-
-if not os.getenv("READTHEDOCS"):
-    # See https://github.com/Ciantic/VirtualDesktopAccessor/issues/33
-    # https://github.com/mzomparelli/zVirtualDesktop/wiki
-    WINDOWS_BUILD = sys.getwindowsversion().build
-    BUILD_OVER_20231 = WINDOWS_BUILD >= 20231
-else:
-    BUILD_OVER_20231 = False
 
 ASFW_ANY = -1
 NULL_PTR = 0
@@ -328,24 +328,52 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        array = self._manager_internal.GetDesktops(*GET_DESKTOP_ARGS)
+        array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
         else:
             raise Exception(f"Desktop with ID {self.id} not found")
 
+    @property
+    def name(self) -> str:
+        """The name of this virtual desktop in the task view.
+        Note that the default name is an empty string even though the task view shows
+        e.g. 'Desktop 4'.
+
+        Returns:
+            str: The desktop name.
+        """
+        array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
+        for vd in array.iter(IVirtualDesktop2):
+            if self.id == vd.GetID():
+                return str(vd.GetName())
+        else:
+            raise Exception(f"Desktop with ID {self.id} not found")
+
+    def rename(self, name: str):
+        """Rename this desktop.
+
+        Args:
+            name: The new name for this desktop.
+        """
+        if BUILD_OVER_21313:
+            self._manager_internal.SetName(self._virtual_desktop, HSTRING(name))
+        else:
+            manager_internal2 = get_vd_manager_internal2()
+            manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
+
     def remove(self, fallback: VirtualDesktop = None):
         """Delete this virtual desktop, falling back to 'fallback'.
 
         Args:
-            fallback (VirtualDesktop, optional):
+            fallback (VirtualDesktop, optional): If you are currently on the desktop
+            you pass to this method, focus will be shifted to the desktop passed here.
+            If no desktop is passed, it will default to the first.
         """
-        manager_internal = get_vd_manager_internal()
         if fallback is None:
             fallback = VirtualDesktop(1)
-        manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
-
+        self._manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
 
     def go(self, allow_set_foreground: bool = True):
         """Switch to this virtual desktop.
@@ -358,10 +386,7 @@ class VirtualDesktop():
         """
         if allow_set_foreground:
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-        if BUILD_OVER_20231:
-            self._manager_internal.SwitchDesktop(NULL_PTR, self._virtual_desktop)
-        else:
-            self._manager_internal.SwitchDesktop(self._virtual_desktop)
+        self._manager_internal.SwitchDesktop(*NULL_IF_OVER_20231, self._virtual_desktop)
 
     def apps_by_z_order(self, include_pinned: bool = True) -> List[AppView]:
         """Get a list of AppViews, ordered by their Z position, with
@@ -391,8 +416,5 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
         List[VirtualDesktop]: Virtual desktops currently active.
     """
     manager_internal = get_vd_manager_internal()
-    if BUILD_OVER_20231:
-        array = manager_internal.GetDesktops(NULL_PTR)
-    else:
-        array = manager_internal.GetDesktops()
+    array = manager_internal.GetDesktops(*NULL_IF_OVER_20231)
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]

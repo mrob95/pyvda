@@ -84,3 +84,11 @@ def test_create_and_remove_desktop():
 
     time.sleep(1) # Got to wait for the animation before we can return
     current_desktop.go()
+
+def test_desktop_names():
+    current_name = current_desktop.name
+    test_name = "pyvda testing"
+    current_desktop.rename(test_name)
+    assert current_desktop.name == test_name
+    current_desktop.rename(current_name)
+    assert current_desktop.name == current_name
