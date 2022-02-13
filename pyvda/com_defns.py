@@ -172,10 +172,19 @@ else:
 # In registry: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}
 class IVirtualDesktop(IUnknown):
     _iid_ = GUID_IVirtualDesktop
-    _methods_ = [
-        STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
-        COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
-    ]
+    if BUILD_OVER_21313:
+        _methods_ = [
+            STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
+            COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
+            COMMETHOD([], HRESULT, "Unknown", (["out"], POINTER(HWND), "pW"),),
+            COMMETHOD([], HRESULT, "GetName", (["out"], POINTER(HSTRING), "pName"),),
+            COMMETHOD([], HRESULT, "GetWallpaperPath", (["out"], POINTER(HSTRING), "pPath"),),
+        ]
+    else:
+        _methods_ = [
+            STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
+            COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
+        ]
 
 
 GUID_IVirtualDesktop2 = GUID("{31EBDE3F-6EC3-4CBD-B9FB-0EF6D09B41F4}")
