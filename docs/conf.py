@@ -23,7 +23,7 @@ copyright = '2021, Mike Roberts'
 author = 'Mike Roberts'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '0.2.2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -70,7 +70,7 @@ html_static_path = ['_static']
 from unittest.mock import Mock
 
 mock_modules = {
-    "comtypes", "ctypes", "ctypes.wintypes"
+    "comtypes", "ctypes", "ctypes.wintypes", "pywin32"
 }
 
 for module_name in mock_modules:

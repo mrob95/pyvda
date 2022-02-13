@@ -3,5 +3,5 @@
 Virtual Desktop
 ============================================================================
 
-.. automodule:: pyvda.desktop
+.. autoclass:: pyvda.VirtualDesktop
     :members:

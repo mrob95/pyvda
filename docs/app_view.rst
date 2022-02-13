@@ -3,5 +3,5 @@
 App View
 ============================================================================
 
-.. automodule:: pyvda.app_view
+.. autoclass:: pyvda.AppView
     :members:

@@ -13,4 +13,3 @@
 
    app_view
    virtual_desktop
-
