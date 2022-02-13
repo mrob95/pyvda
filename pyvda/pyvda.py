@@ -310,7 +310,6 @@ class VirtualDesktop():
         Returns:
             VirtualDesktop: The created desktop.
         """
-
         manager_internal = get_vd_manager_internal()
 
         if BUILD_OVER_20231:
@@ -346,6 +345,18 @@ class VirtualDesktop():
                 return i
         else:
             raise Exception(f"Desktop with ID {self.id} not found")
+
+    def remove(self, fallback: VirtualDesktop = None):
+        """Delete this virtual desktop, falling back to 'fallback'.
+
+        Args:
+            fallback (VirtualDesktop, optional):
+        """
+        manager_internal = get_vd_manager_internal()
+        if fallback is None:
+            fallback = VirtualDesktop(1)
+        manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
+
 
     def go(self, allow_set_foreground: bool = True):
         """Switch to this virtual desktop.
@@ -396,4 +407,3 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
     else:
         array = manager_internal.GetDesktops()
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
-
