@@ -213,6 +213,11 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "FindDesktop", (["in"], POINTER(GUID), "pGuid"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop")),
             STDMETHOD(HRESULT, "Unknown", (POINTER(IVirtualDesktop), POINTER(POINTER(IObjectArray)), POINTER(POINTER(IObjectArray)))),
             COMMETHOD([], HRESULT, "SetName", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "name")),
+            COMMETHOD([], HRESULT, "SetWallpaper", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "SetWallpaperForAllDesktops", (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "CopyDesktopState", (["in"], POINTER(IApplicationView), "pView0"), (["in"], POINTER(IApplicationView), "pView0")),
+            COMMETHOD([], HRESULT, "GetDesktopPerMonitor", (["out"], POINTER(BOOL), "state")),
+            COMMETHOD([], HRESULT, "SetDesktopPerMonitor", (["in"], BOOL, "state")),
         ]
     elif BUILD_OVER_20231:
         _methods_ = [
