@@ -24,6 +24,9 @@ else:
 
 ASFW_ANY = -1
 NULL_PTR = 0
+# In build 20231, a number of calls had normally-null
+# hwnd arguments added, e.g. GetCurrentDesktop, GetDesktops
+NULL_IF_OVER_20231 = [NULL_PTR] if BUILD_OVER_20231 else []
 
 class AppView():
     """
@@ -267,10 +270,7 @@ class VirtualDesktop():
         if number:
             if number <= 0:
                 raise ValueError(f"Desktop number must be at least 1, {number} provided")
-            if BUILD_OVER_20231:
-                array = self._manager_internal.GetDesktops(NULL_PTR)
-            else:
-                array = self._manager_internal.GetDesktops()
+            array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
             desktop_count = array.GetCount()
             if number > desktop_count:
                 raise ValueError(
@@ -285,10 +285,7 @@ class VirtualDesktop():
             self._virtual_desktop = desktop
 
         elif current:
-            if BUILD_OVER_20231:
-                self._virtual_desktop = self._manager_internal.GetCurrentDesktop(NULL_PTR)
-            else:
-                self._virtual_desktop = self._manager_internal.GetCurrentDesktop()
+            self._virtual_desktop = self._manager_internal.GetCurrentDesktop(*NULL_IF_OVER_20231)
 
         else:
             raise Exception("Must provide one of 'number', 'desktop_id' or 'desktop'")
@@ -311,12 +308,7 @@ class VirtualDesktop():
             VirtualDesktop: The created desktop.
         """
         manager_internal = get_vd_manager_internal()
-
-        if BUILD_OVER_20231:
-            desktop = manager_internal.CreateDesktopW(NULL_PTR)
-        else:
-            desktop = manager_internal.CreateDesktopW()
-
+        desktop = manager_internal.CreateDesktopW(*NULL_IF_OVER_20231)
         return cls(desktop=desktop)
 
     @property
@@ -336,10 +328,7 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        if BUILD_OVER_20231:
-            array = self._manager_internal.GetDesktops(NULL_PTR)
-        else:
-            array = self._manager_internal.GetDesktops()
+        array = self._manager_internal.GetDesktops(*GET_DESKTOP_ARGS)
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
