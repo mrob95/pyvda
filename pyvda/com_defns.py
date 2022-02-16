@@ -35,11 +35,10 @@ from comtypes import (
 from .winstring import HSTRING
 
 if not os.getenv("READTHEDOCS"):
-    # See https://github.com/Ciantic/VirtualDesktopAccessor/issues/33
-    # https://github.com/mzomparelli/zVirtualDesktop/wiki
-    WINDOWS_BUILD = sys.getwindowsversion().build
-    BUILD_OVER_20231 = WINDOWS_BUILD >= 20231
-    BUILD_OVER_21313 = WINDOWS_BUILD >= 21313
+    winver = sys.getwindowsversion()
+    major, minor, build = winver.platform_version or winver[:3]
+    BUILD_OVER_20231 = build >= 20231
+    BUILD_OVER_21313 = build >= 21313
 else:
     BUILD_OVER_20231 = False
     BUILD_OVER_21313 = False
