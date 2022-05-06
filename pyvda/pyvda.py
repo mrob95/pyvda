@@ -410,7 +410,14 @@ class VirtualDesktop():
             if view.is_shown_in_switchers() and view.is_on_desktop(self, include_pinned):
                 result.append(view)
         return result
+    
+    def set_wallpaper(self, path:str) -> bool:
+        """Set wallpaper on current virtual desktop to `path`.
 
+        Args:
+            path (str): path to wallpaper file
+        """
+        self._manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
 
 def get_virtual_desktops() -> List[VirtualDesktop]:
     """Return a list of all current virtual desktops, one for each desktop visible in the task view.
