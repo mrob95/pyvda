@@ -410,7 +410,7 @@ class VirtualDesktop():
             if view.is_shown_in_switchers() and view.is_on_desktop(self, include_pinned):
                 result.append(view)
         return result
-    
+
     def set_wallpaper(self, path:str) -> bool:
         """Set wallpaper on current virtual desktop to `path`.
 
@@ -422,16 +422,6 @@ class VirtualDesktop():
         else:
             raise WindowsError("set_wallpaper is only available on Windows 11")
 
-    def set_wallpaper_all_desktops(self, path:str) -> bool:
-        """Set wallpaper on current virtual desktop to `path`.
-
-        Args:
-            path (str): path to wallpaper file
-        """
-        if BUILD_OVER_21313:
-            self._manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
-        else:
-            raise WindowsError("set_wallpaper_all_desktops is only available on Windows 11")
 
 def get_virtual_desktops() -> List[VirtualDesktop]:
     """Return a list of all current virtual desktops, one for each desktop visible in the task view.
@@ -442,3 +432,15 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
     manager_internal = get_vd_manager_internal()
     array = manager_internal.GetDesktops(*NULL_IF_OVER_20231)
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
+
+def set_wallpaper_for_all_desktops(path:str) -> bool:
+    """Set wallpaper on current virtual desktop to `path`.
+
+    Args:
+        path (str): path to wallpaper file
+    """
+    if BUILD_OVER_21313:
+        manager_internal = get_vd_manager_internal()
+        manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
+    else:
+        raise WindowsError("set_wallpaper_for_all_desktops is only available on Windows 11")
