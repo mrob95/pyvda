@@ -1,4 +1,10 @@
-from pyvda import AppView, VirtualDesktop, get_virtual_desktops, get_apps_by_z_order
+from pyvda import (
+    AppView,
+    VirtualDesktop,
+    get_virtual_desktops,
+    get_apps_by_z_order,
+    set_wallpaper_for_all_desktops
+)
 import time
 import win32gui
 
