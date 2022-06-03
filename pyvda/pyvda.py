@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import List
+from typing import List, Optional
 
 from comtypes import GUID
 from ctypes import windll
@@ -252,10 +252,10 @@ class VirtualDesktop():
     """
     def __init__(
         self,
-        number: int = None,
-        desktop_id: GUID = None,
-        desktop: 'IVirtualDesktop' = None,
-        current: bool = False
+        number: Optional[int] = None,
+        desktop_id: Optional[GUID] = None,
+        desktop: Optional['IVirtualDesktop'] = None,
+        current: Optional[bool] = False
     ):
         """One of the following arguments must be provided:
 
@@ -270,7 +270,7 @@ class VirtualDesktop():
         if number:
             if number <= 0:
                 raise ValueError(f"Desktop number must be at least 1, {number} provided")
-            array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
+            array = self._manager_internal.get_all_desktops()
             desktop_count = array.GetCount()
             if number > desktop_count:
                 raise ValueError(
@@ -285,7 +285,7 @@ class VirtualDesktop():
             self._virtual_desktop = desktop
 
         elif current:
-            self._virtual_desktop = self._manager_internal.GetCurrentDesktop(*NULL_IF_OVER_20231)
+            self._virtual_desktop = self._manager_internal.get_current_desktop()
 
         else:
             raise Exception("Must provide one of 'number', 'desktop_id' or 'desktop'")
@@ -328,7 +328,7 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
+        array = self._manager_internal.get_all_desktops()
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
@@ -347,7 +347,7 @@ class VirtualDesktop():
         if BUILD_OVER_21313:
             return str(self._virtual_desktop.GetName())
 
-        array = self._manager_internal.GetDesktops(*NULL_IF_OVER_20231)
+        array = self._manager_internal.get_all_desktops()
         for vd in array.iter(IVirtualDesktop2):
             if self.id == vd.GetID():
                 return str(vd.GetName())
@@ -411,7 +411,7 @@ class VirtualDesktop():
                 result.append(view)
         return result
 
-    def set_wallpaper(self, path:str) -> bool:
+    def set_wallpaper(self, path: str):
         """Set wallpaper on current virtual desktop to `path`.
 
         Args:
@@ -430,10 +430,11 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
         List[VirtualDesktop]: Virtual desktops currently active.
     """
     manager_internal = get_vd_manager_internal()
-    array = manager_internal.GetDesktops(*NULL_IF_OVER_20231)
+    array = manager_internal.get_all_desktops()
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
 
-def set_wallpaper_for_all_desktops(path:str) -> bool:
+
+def set_wallpaper_for_all_desktops(path: str):
     """Set wallpaper on current virtual desktop to `path`.
 
     Args:
