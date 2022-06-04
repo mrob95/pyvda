@@ -11,17 +11,16 @@ import win32gui
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
 
-def test_move():
+def test_move_and_go():
     current_window.move(VirtualDesktop(1))
 
-def test_go():
     VirtualDesktop(1).go()
-    assert VirtualDesktop.current().number == 1
+    current_desktop_number = VirtualDesktop.current().number
+    assert current_desktop_number == 1, f"Wanted 1, got {current_desktop_number}"
 
-def test_get_number():
-    assert current_window.desktop.number == 1
+    current_window_desktop_number = current_window.desktop.number
+    assert current_window_desktop_number == 1, f"Wanted 1, got {current_window_desktop_number}"
 
-def test_cleanup():
     current_window.move(current_desktop)
     current_desktop.go()
 
@@ -69,7 +68,7 @@ def test_visibility():
 def test_current():
     count = len(get_virtual_desktops())
     current = VirtualDesktop.current().number
-    assert 0 < current <= count
+    assert 0 < current <= count, f"Current desktop number {current} is outside of expected range 0-{count}"
 
     hwnd = win32gui.GetForegroundWindow()
     assert AppView(hwnd) == AppView.current()
@@ -79,14 +78,15 @@ def test_create_and_remove_desktop():
     old_count = len(get_virtual_desktops())
     new = VirtualDesktop.create()
     new_count = len(get_virtual_desktops())
-    assert new_count == old_count + 1
+    expected_count = old_count + 1
+    assert new_count == expected_count, f"Wanted {expected_count}, got {new_count}"
     new.go()
 
-    new.remove(VirtualDesktop(1))
+    new.remove(fallback=VirtualDesktop(1))
     new_count = len(get_virtual_desktops())
-    assert new_count == old_count
+    assert new_count == old_count, f"Wanted {new_count}, got {new_count}"
     fellback = VirtualDesktop.current().number
-    assert fellback == 1
+    assert fellback == 1, f"Wanted 1, got {fellback}"
 
     time.sleep(1) # Got to wait for the animation before we can return
     current_desktop.go()
@@ -95,6 +95,6 @@ def test_desktop_names():
     current_name = current_desktop.name
     test_name = "pyvda testing"
     current_desktop.rename(test_name)
-    assert current_desktop.name == test_name
+    assert current_desktop.name == test_name, f"Wanted '{test_name}', got '{current_desktop.name}'"
     current_desktop.rename(current_name)
-    assert current_desktop.name == current_name
+    assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
