@@ -282,7 +282,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
 
     def get_all_desktops(self) -> IObjectArray:
         if BUILD_OVER_22449:
-            return self.GetAllCurrentDesktops()
+            return self.GetDesktops(1)
         elif BUILD_OVER_20231:
             return self.GetDesktops(0)
         else:
