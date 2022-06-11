@@ -1,3 +1,4 @@
+import threading
 from ctypes import POINTER
 from comtypes import (
     CoInitialize,
@@ -44,3 +45,10 @@ def get_view_collection():
 
 def get_pinned_apps():
     return _get_object(IVirtualDesktopPinnedApps, CLSID_VirtualDesktopPinnedApps)
+
+class Managers(threading.local):
+    def __init__(self):
+        self.manager_internal = get_vd_manager_internal()
+        self.manager_internal2 = get_vd_manager_internal2()
+        self.view_collection = get_view_collection()
+        self.pinned_apps = get_pinned_apps()
