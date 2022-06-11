@@ -1,3 +1,4 @@
+from typing import Optional
 from pyvda import (
     AppView,
     VirtualDesktop,
@@ -7,6 +8,7 @@ from pyvda import (
 )
 import time
 import win32gui
+import threading
 
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
@@ -98,3 +100,18 @@ def test_desktop_names():
     assert current_desktop.name == test_name, f"Wanted '{test_name}', got '{current_desktop.name}'"
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
+
+
+def test_move_and_go_threads():
+    error: Optional[Exception] = None
+    def f():
+        nonlocal error
+        try:
+            test_move_and_go()
+        except Exception as e:
+            error = e
+    t = threading.Thread(target=f)
+    t.start()
+    t.join()
+    if error is not None:
+        raise error

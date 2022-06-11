@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-import sys
 from typing import List, Optional
 
 from comtypes import GUID
@@ -15,18 +13,16 @@ from .com_defns import (
     BUILD_OVER_20231,
     BUILD_OVER_21313,
 )
-from .utils import (
-    get_vd_manager_internal,
-    get_vd_manager_internal2,
-    get_view_collection,
-    get_pinned_apps,
-)
+from .utils import Managers
 
 ASFW_ANY = -1
 NULL_PTR = 0
 # In build 20231, a number of calls had normally-null
 # hwnd arguments added, e.g. GetCurrentDesktop, GetDesktops
 NULL_IF_OVER_20231 = [NULL_PTR] if BUILD_OVER_20231 else []
+
+managers = Managers()
+
 
 class AppView():
     """
@@ -47,8 +43,7 @@ class AppView():
         """
         if hwnd:
             # Get the IApplicationView for the window
-            view_collection = get_view_collection()
-            self._view = view_collection.GetViewForHwnd(hwnd)
+            self._view = managers.view_collection.GetViewForHwnd(hwnd)
         elif view:
             self._view = view
         else:
@@ -75,8 +70,7 @@ class AppView():
         Returns:
             AppView: An AppView for the currently focused window.
         """
-        view_collection = get_view_collection()
-        focused = view_collection.GetViewInFocus()
+        focused = managers.view_collection.GetViewInFocus()
         return cls(view=focused)
 
     #  ------------------------------------------------
@@ -114,15 +108,13 @@ class AppView():
         """
         Pin the window (corresponds to the 'show window on all desktops' toggle).
         """
-        pinnedApps = get_pinned_apps()
-        pinnedApps.PinView(self._view)
+        managers.pinned_apps.PinView(self._view)
 
     def unpin(self):
         """
         Unpin the window (corresponds to the 'show window on all desktops' toggle).
         """
-        pinnedApps = get_pinned_apps()
-        pinnedApps.UnpinView(self._view)
+        managers.pinned_apps.UnpinView(self._view)
 
     def is_pinned(self) -> bool:
         """
@@ -131,22 +123,19 @@ class AppView():
         Returns:
             bool: is the window pinned?
         """
-        pinnedApps = get_pinned_apps()
-        return pinnedApps.IsViewPinned(self._view)
+        return managers.pinned_apps.IsViewPinned(self._view)
 
     def pin_app(self):
         """
         Pin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
-        pinnedApps = get_pinned_apps()
-        pinnedApps.PinAppID(self.app_id)
+        managers.pinned_apps.PinAppID(self.app_id)
 
     def unpin_app(self):
         """
         Unpin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
-        pinnedApps = get_pinned_apps()
-        pinnedApps.UnpinAppID(self.app_id)
+        managers.pinned_apps.UnpinAppID(self.app_id)
 
     def is_app_pinned(self) -> bool:
         """
@@ -155,8 +144,7 @@ class AppView():
         Returns:
             bool: is the app pinned?.
         """
-        pinnedApps = get_pinned_apps()
-        return pinnedApps.IsAppIdPinned(self.app_id)
+        return managers.pinned_apps.IsAppIdPinned(self.app_id)
 
 
     #  ------------------------------------------------
@@ -173,8 +161,7 @@ class AppView():
                 >>> AppView.current().move_to_desktop(VirtualDesktop(1))
 
         """
-        manager_internal = get_vd_manager_internal()
-        manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)
+        managers.manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)
 
     @property
     def desktop_id(self) -> GUID:
@@ -228,8 +215,7 @@ def get_apps_by_z_order(switcher_windows: bool = True, current_desktop: bool = T
     Returns:
         List[AppView]: AppViews matching the specified criteria.
     """
-    collection = get_view_collection()
-    views_arr = collection.GetViewsByZOrder()
+    views_arr = managers.view_collection.GetViewsByZOrder()
     all_views = [AppView(view=v) for v in views_arr.iter(IApplicationView)]
     if not switcher_windows and not current_desktop:
         # no filters
@@ -265,12 +251,11 @@ class VirtualDesktop():
             desktop (IVirtualDesktop, optional): An `IVirtualDesktop`. Defaults to None.
             current (bool, optional): The current virtual desktop. Defaults to False.
         """
-        self._manager_internal = get_vd_manager_internal()
 
         if number:
             if number <= 0:
                 raise ValueError(f"Desktop number must be at least 1, {number} provided")
-            array = self._manager_internal.get_all_desktops()
+            array = managers.manager_internal.get_all_desktops()
             desktop_count = array.GetCount()
             if number > desktop_count:
                 raise ValueError(
@@ -279,13 +264,13 @@ class VirtualDesktop():
             self._virtual_desktop = array.get_at(number - 1, IVirtualDesktop)
 
         elif desktop_id:
-            self._virtual_desktop = self._manager_internal.FindDesktop(desktop_id)
+            self._virtual_desktop = managers.manager_internal.FindDesktop(desktop_id)
 
         elif desktop:
             self._virtual_desktop = desktop
 
         elif current:
-            self._virtual_desktop = self._manager_internal.get_current_desktop()
+            self._virtual_desktop = managers.manager_internal.get_current_desktop()
 
         else:
             raise Exception("Must provide one of 'number', 'desktop_id' or 'desktop'")
@@ -307,8 +292,7 @@ class VirtualDesktop():
         Returns:
             VirtualDesktop: The created desktop.
         """
-        manager_internal = get_vd_manager_internal()
-        desktop = manager_internal.CreateDesktopW(*NULL_IF_OVER_20231)
+        desktop = managers.manager_internal.CreateDesktopW(*NULL_IF_OVER_20231)
         return cls(desktop=desktop)
 
     @property
@@ -328,7 +312,7 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        array = self._manager_internal.get_all_desktops()
+        array = managers.manager_internal.get_all_desktops()
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
@@ -347,7 +331,7 @@ class VirtualDesktop():
         if BUILD_OVER_21313:
             return str(self._virtual_desktop.GetName())
 
-        array = self._manager_internal.get_all_desktops()
+        array = managers.manager_internal.get_all_desktops()
         for vd in array.iter(IVirtualDesktop2):
             if self.id == vd.GetID():
                 return str(vd.GetName())
@@ -361,10 +345,9 @@ class VirtualDesktop():
             name: The new name for this desktop.
         """
         if BUILD_OVER_21313:
-            self._manager_internal.SetName(self._virtual_desktop, HSTRING(name))
+            managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name))
         else:
-            manager_internal2 = get_vd_manager_internal2()
-            manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
+            managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
 
     def remove(self, fallback: VirtualDesktop = None):
         """Delete this virtual desktop, falling back to 'fallback'.
@@ -376,7 +359,7 @@ class VirtualDesktop():
         """
         if fallback is None:
             fallback = VirtualDesktop(1)
-        self._manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
+        managers.manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
 
     def go(self, allow_set_foreground: bool = True):
         """Switch to this virtual desktop.
@@ -389,7 +372,7 @@ class VirtualDesktop():
         """
         if allow_set_foreground:
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-        self._manager_internal.SwitchDesktop(*NULL_IF_OVER_20231, self._virtual_desktop)
+        managers.manager_internal.SwitchDesktop(*NULL_IF_OVER_20231, self._virtual_desktop)
 
     def apps_by_z_order(self, include_pinned: bool = True) -> List[AppView]:
         """Get a list of AppViews, ordered by their Z position, with
@@ -402,8 +385,7 @@ class VirtualDesktop():
         Returns:
             List[AppView]: AppViews matching the specified criteria.
         """
-        collection = get_view_collection()
-        views_arr = collection.GetViewsByZOrder()
+        views_arr = managers.view_collection.GetViewsByZOrder()
         all_views = [AppView(view=v) for v in views_arr.iter(IApplicationView)]
         result = []
         for view in all_views:
@@ -418,7 +400,7 @@ class VirtualDesktop():
             path (str): path to wallpaper file
         """
         if BUILD_OVER_21313:
-            self._manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
+            managers.manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
         else:
             raise WindowsError("set_wallpaper is only available on Windows 11")
 
@@ -429,8 +411,7 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
     Returns:
         List[VirtualDesktop]: Virtual desktops currently active.
     """
-    manager_internal = get_vd_manager_internal()
-    array = manager_internal.get_all_desktops()
+    array = managers.manager_internal.get_all_desktops()
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
 
 
@@ -441,7 +422,6 @@ def set_wallpaper_for_all_desktops(path: str):
         path (str): path to wallpaper file
     """
     if BUILD_OVER_21313:
-        manager_internal = get_vd_manager_internal()
-        manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
+        managers.manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
     else:
         raise WindowsError("set_wallpaper_for_all_desktops is only available on Windows 11")
