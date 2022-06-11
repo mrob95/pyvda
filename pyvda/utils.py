@@ -15,6 +15,8 @@ from .com_defns import (
     IServiceProvider,
     CLSID_ImmersiveShell,
     CLSID_VirtualDesktopManagerInternal,
+    BUILD_OVER_20231,
+    BUILD_OVER_21313,
 )
 
 
@@ -49,6 +51,9 @@ def get_pinned_apps():
 class Managers(threading.local):
     def __init__(self):
         self.manager_internal = get_vd_manager_internal()
-        self.manager_internal2 = get_vd_manager_internal2()
         self.view_collection = get_view_collection()
         self.pinned_apps = get_pinned_apps()
+
+        # Old interface only used for SetName
+        if not BUILD_OVER_21313:
+            self.manager_internal2 = get_vd_manager_internal2()
