@@ -1,7 +1,8 @@
+import logging
 import threading
 from ctypes import POINTER
 from comtypes import (
-    CoInitialize,
+    CoInitializeEx,
     CoCreateInstance,
     CLSCTX_LOCAL_SERVER,
 )
@@ -15,13 +16,13 @@ from .com_defns import (
     IServiceProvider,
     CLSID_ImmersiveShell,
     CLSID_VirtualDesktopManagerInternal,
-    BUILD_OVER_20231,
     BUILD_OVER_21313,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def _get_object(cls, clsid = None):
-    CoInitialize()
     pServiceProvider = CoCreateInstance(
         CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
     )
@@ -50,6 +51,7 @@ def get_pinned_apps():
 
 class Managers(threading.local):
     def __init__(self):
+        self.try_init_com()
         self.manager_internal = get_vd_manager_internal()
         self.view_collection = get_view_collection()
         self.pinned_apps = get_pinned_apps()
@@ -57,3 +59,13 @@ class Managers(threading.local):
         # Old interface only used for SetName
         if not BUILD_OVER_21313:
             self.manager_internal2 = get_vd_manager_internal2()
+
+    @staticmethod
+    def try_init_com():
+        try:
+            CoInitializeEx()
+        except OSError as e:
+            # This is likely because COM has already been initialised with
+            # COINIT_MULTITHREADED, whereas CoInitialize uses COINIT_APARTMENTTHREADED.
+            # This should not be a problem for us, so warn and keep going.
+            logger.warning("Failed to initialise COM: %s", str(e))
