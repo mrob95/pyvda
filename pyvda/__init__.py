@@ -34,7 +34,7 @@ Example
     AppView.current().pin()
 """
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 import platform
 import os
