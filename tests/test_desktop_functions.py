@@ -1,10 +1,10 @@
+from comtypes import CoInitializeEx, COINIT_MULTITHREADED
 from typing import Optional
 from pyvda import (
     AppView,
     VirtualDesktop,
     get_virtual_desktops,
     get_apps_by_z_order,
-    set_wallpaper_for_all_desktops
 )
 import time
 import win32gui
@@ -101,12 +101,26 @@ def test_desktop_names():
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
 
-
 def test_move_and_go_threads():
     error: Optional[Exception] = None
     def f():
         nonlocal error
         try:
+            test_move_and_go()
+        except Exception as e:
+            error = e
+    t = threading.Thread(target=f)
+    t.start()
+    t.join()
+    if error is not None:
+        raise error
+
+def test_initialisation_with_com_mta():
+    error: Optional[Exception] = None
+    def f():
+        nonlocal error
+        try:
+            CoInitializeEx(COINIT_MULTITHREADED)
             test_move_and_go()
         except Exception as e:
             error = e
