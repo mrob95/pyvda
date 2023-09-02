@@ -40,10 +40,12 @@ if not os.getenv("READTHEDOCS"):
     BUILD_OVER_20231 = build >= 20231
     BUILD_OVER_21313 = build >= 21313
     BUILD_OVER_22449 = build >= 22449
+    BUILD_OVER_22621 = build >= 22621
 else:
     BUILD_OVER_20231 = False
     BUILD_OVER_21313 = False
     BUILD_OVER_22449 = False
+    BUILD_OVER_22621 = False
 
 
 CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")
@@ -149,22 +151,24 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "EnumerateOwnershipTree", (POINTER(POINTER(IObjectArray)),)),
     STDMETHOD(HRESULT, "GetEnterpriseId", (POINTER(PWSTR),)),
     STDMETHOD(HRESULT, "IsMirrored", (POINTER(BOOL),)),
-    STDMETHOD(HRESULT, "Unknown1", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "Unknown2", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "Unknown3", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "Unknown4", (UINT,)),
-    STDMETHOD(HRESULT, "Unknown5", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "Unknown6", (UINT,)),
-    STDMETHOD(HRESULT, "Unknown7", ()),
-    STDMETHOD(HRESULT, "Unknown8", (POINTER(UINT),)),
-    STDMETHOD(HRESULT, "Unknown9", (UINT,)),
-    STDMETHOD(HRESULT, "Unknown10", (UINT, UINT,)),
-    STDMETHOD(HRESULT, "Unknown11", (UINT,)),
-    STDMETHOD(HRESULT, "Unknown12", (POINTER(SIZE),)),
+    STDMETHOD(HRESULT, "GetFrameworkViewType", (POINTER(UINT),)),
+    STDMETHOD(HRESULT, "GetCanTab", (POINTER(UINT),)),
+    STDMETHOD(HRESULT, "SetCanTab", (UINT,)),
+    STDMETHOD(HRESULT, "GetIsTabbed", (POINTER(UINT),)),
+    STDMETHOD(HRESULT, "SetIsTabbed", (UINT,)),
+    STDMETHOD(HRESULT, "RefreshCanTab", ()),
+    STDMETHOD(HRESULT, "GetIsOccluded", (POINTER(UINT),)),
+    STDMETHOD(HRESULT, "SetIsOccluded", (UINT,)),
+    STDMETHOD(HRESULT, "UpdateEngagementFlags", (UINT, UINT,)),
+    STDMETHOD(HRESULT, "SetForceActiveWindowAppearance", (UINT,)),
+    STDMETHOD(HRESULT, "GetLastActivationFILETIME", (POINTER(SIZE),)),
+    STDMETHOD(HRESULT, "GetPersistingStateName", (POINTER(PWSTR),)),
 ]
 
 # No change for 22449
-if BUILD_OVER_21313:
+if BUILD_OVER_22621:
+    GUID_IVirtualDesktop = GUID("{3F07F4BE-B107-441A-AF0F-39D82529072C}")
+elif BUILD_OVER_21313:
     GUID_IVirtualDesktop = GUID("{536D3495-B208-4CC9-AE26-DE8111275BF8}")
 elif BUILD_OVER_20231:
     GUID_IVirtualDesktop = GUID("{62FDF88B-11CA-4AFB-8BD8-2296DFAE49E2}")
@@ -174,11 +178,19 @@ else:
 # In registry: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}
 class IVirtualDesktop(IUnknown):
     _iid_ = GUID_IVirtualDesktop
-    if BUILD_OVER_21313:
+    if BUILD_OVER_22621:
         _methods_ = [
             STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
             COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
-            COMMETHOD([], HRESULT, "Unknown", (["out"], POINTER(HWND), "pW"),),
+            COMMETHOD([], HRESULT, "GetName", (["out"], POINTER(HSTRING), "pName"),),
+            COMMETHOD([], HRESULT, "GetWallpaperPath", (["out"], POINTER(HSTRING), "pPath"),),
+            COMMETHOD([], HRESULT, "IsRemote", (["out"], POINTER(HWND), "pW"), ),
+        ]
+    elif BUILD_OVER_21313:
+        _methods_ = [
+            STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
+            COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
+            COMMETHOD([], HRESULT, "IsRemote", (["out"], POINTER(HWND), "pW"),),
             COMMETHOD([], HRESULT, "GetName", (["out"], POINTER(HSTRING), "pName"),),
             COMMETHOD([], HRESULT, "GetWallpaperPath", (["out"], POINTER(HSTRING), "pPath"),),
         ]
@@ -200,7 +212,9 @@ class IVirtualDesktop2(IUnknown):
 
 
 # Same GUID for 22449
-if BUILD_OVER_21313:
+if BUILD_OVER_22621:
+    GUID_IVirtualDesktopManagerInternal = GUID("{A3175F2D-239C-4BD2-8AA0-EEBA8B0B138E}")
+elif BUILD_OVER_21313:
     GUID_IVirtualDesktopManagerInternal = GUID("{B2F925B9-5A0F-4D2E-9F4D-2B1507593C10}")
 elif BUILD_OVER_20231:
     GUID_IVirtualDesktopManagerInternal = GUID("{094AFE11-44F2-4BA0-976F-29A97E263EE0}")
@@ -210,7 +224,28 @@ else:
 # HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{F31574D6-B682-4CDC-BD56-1827860ABEC6}
 class IVirtualDesktopManagerInternal(IUnknown):
     _iid_ = GUID_IVirtualDesktopManagerInternal
-    if BUILD_OVER_22449:
+    if BUILD_OVER_22621:
+        _methods_ = [
+            COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
+            STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
+            STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
+            COMMETHOD([], HRESULT, "GetCurrentDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
+            STDMETHOD(HRESULT, "GetAdjacentDesktop", (POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),)),
+            STDMETHOD(HRESULT, "SwitchDesktop", (HWND, POINTER(IVirtualDesktop),)),
+            COMMETHOD([], HRESULT, "CreateDesktopW", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), HWND, INT)),
+            COMMETHOD([], HRESULT, "RemoveDesktop", (["in"], POINTER(IVirtualDesktop), "destroyDesktop"), (["in"], POINTER(IVirtualDesktop), "fallbackDesktop")),
+            COMMETHOD([], HRESULT, "FindDesktop", (["in"], POINTER(GUID), "pGuid"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop")),
+            STDMETHOD(HRESULT, "Unknown", (POINTER(IVirtualDesktop), POINTER(POINTER(IObjectArray)), POINTER(POINTER(IObjectArray)))),
+            COMMETHOD([], HRESULT, "SetName", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "name")),
+            COMMETHOD([], HRESULT, "SetWallpaper", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "SetWallpaperForAllDesktops", (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "CopyDesktopState", (["in"], POINTER(IApplicationView), "pView0"), (["in"], POINTER(IApplicationView), "pView0")),
+            COMMETHOD([], HRESULT, "GetDesktopPerMonitor", (["out"], POINTER(BOOL), "state")),
+            COMMETHOD([], HRESULT, "SetDesktopPerMonitor", (["in"], BOOL, "state")),
+        ]
+    elif BUILD_OVER_22449:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount", (["in"], HWND, "hwnd"), (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -281,7 +316,9 @@ class IVirtualDesktopManagerInternal(IUnknown):
         ]
 
     def get_all_desktops(self) -> IObjectArray:
-        if BUILD_OVER_22449:
+        if BUILD_OVER_22621:
+            return self.GetDesktops()
+        elif BUILD_OVER_22449:
             # See https://github.com/mrob95/pyvda/issues/15#issuecomment-1146642608 for
             # discussion/theorising about this. Unclear at this point where MS are
             # going with it.
@@ -292,7 +329,9 @@ class IVirtualDesktopManagerInternal(IUnknown):
             return self.GetDesktops()
 
     def get_current_desktop(self) -> IVirtualDesktop:
-        if BUILD_OVER_20231:
+        if BUILD_OVER_22621:
+            return self.GetCurrentDesktop()
+        elif BUILD_OVER_20231:
             return self.GetCurrentDesktop(0)
         else:
             return self.GetCurrentDesktop()
