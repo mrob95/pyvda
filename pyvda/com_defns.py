@@ -336,6 +336,14 @@ class IVirtualDesktopManagerInternal(IUnknown):
         else:
             return self.GetCurrentDesktop()
 
+    def create_desktop(self) -> IVirtualDesktop:
+        if BUILD_OVER_22621:
+            return self.CreateDesktopW()
+        elif BUILD_OVER_20231:
+            return self.CreateDesktopW(0)
+        else:
+            return self.CreateDesktopW()
+
 
 GUID_IVirtualDesktopManagerInternal2 = GUID("{0F3A72B0-4566-487E-9A33-4ED302F6D6CE}")
 class IVirtualDesktopManagerInternal2(IUnknown):

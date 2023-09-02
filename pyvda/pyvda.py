@@ -292,7 +292,7 @@ class VirtualDesktop():
         Returns:
             VirtualDesktop: The created desktop.
         """
-        desktop = managers.manager_internal.CreateDesktopW(*NULL_IF_OVER_20231)
+        desktop = managers.manager_internal.create_desktop()
         return cls(desktop=desktop)
 
     @property
