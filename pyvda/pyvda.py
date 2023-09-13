@@ -10,16 +10,12 @@ from .com_defns import (
     IApplicationView,
     IVirtualDesktop,
     IVirtualDesktop2,
-    BUILD_OVER_20231,
     BUILD_OVER_21313,
 )
 from .utils import Managers
 
 ASFW_ANY = -1
 NULL_PTR = 0
-# In build 20231, a number of calls had normally-null
-# hwnd arguments added, e.g. GetCurrentDesktop, GetDesktops
-NULL_IF_OVER_20231 = [NULL_PTR] if BUILD_OVER_20231 else []
 
 managers = Managers()
 
@@ -372,7 +368,7 @@ class VirtualDesktop():
         """
         if allow_set_foreground:
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-        managers.manager_internal.SwitchDesktop(*NULL_IF_OVER_20231, self._virtual_desktop)
+        managers.manager_internal.switch_desktop(self._virtual_desktop)
 
     def apps_by_z_order(self, include_pinned: bool = True) -> List[AppView]:
         """Get a list of AppViews, ordered by their Z position, with

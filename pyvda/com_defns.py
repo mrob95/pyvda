@@ -232,7 +232,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "GetCurrentDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
             STDMETHOD(HRESULT, "GetAdjacentDesktop", (POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),)),
-            STDMETHOD(HRESULT, "SwitchDesktop", (HWND, POINTER(IVirtualDesktop),)),
+            STDMETHOD(HRESULT, "SwitchDesktop", (POINTER(IVirtualDesktop),)),
             COMMETHOD([], HRESULT, "CreateDesktopW", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), HWND, INT)),
             COMMETHOD([], HRESULT, "RemoveDesktop", (["in"], POINTER(IVirtualDesktop), "destroyDesktop"), (["in"], POINTER(IVirtualDesktop), "fallbackDesktop")),
@@ -321,7 +321,8 @@ class IVirtualDesktopManagerInternal(IUnknown):
         elif BUILD_OVER_22449:
             # See https://github.com/mrob95/pyvda/issues/15#issuecomment-1146642608 for
             # discussion/theorising about this. Unclear at this point where MS are
-            # going with it.
+            # going with it. Could probably be zero but don't want to break it when
+            # I don't have a test machine.
             return self.GetDesktops(1)
         elif BUILD_OVER_20231:
             return self.GetDesktops(0)
@@ -343,6 +344,14 @@ class IVirtualDesktopManagerInternal(IUnknown):
             return self.CreateDesktopW(0)
         else:
             return self.CreateDesktopW()
+
+    def switch_desktop(self, target: IVirtualDesktop) -> IVirtualDesktop:
+        if BUILD_OVER_22621:
+            return self.SwitchDesktop(target)
+        elif BUILD_OVER_20231:
+            return self.SwitchDesktop(0, target)
+        else:
+            return self.SwitchDesktop(target)
 
 
 GUID_IVirtualDesktopManagerInternal2 = GUID("{0F3A72B0-4566-487E-9A33-4ED302F6D6CE}")
