@@ -34,15 +34,22 @@ Example
     AppView.current().pin()
 """
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 import platform
 import os
 
+def _check_release():
+    try:
+        release = int(platform.release())
+        return release >= 10
+    except ValueError:
+        return platform.release() == "10"
+
 def _check_version():
-    if platform.system() != "Windows" or platform.release() != "10":
+    if platform.system() != "Windows" or not _check_release():
         raise WindowsError(
-            "The virtual desktop feature is only available on Windows 10"
+            "The virtual desktop feature is only available on Windows 10 and later."
         )
 
 if not os.getenv("READTHEDOCS"):
