@@ -1,5 +1,5 @@
 # Python Virtual Desktop Accessor
-Python module providing programmatic access to most of the settings accessed through the [Windows 10 task view](https://en.wikipedia.org/wiki/Task_View).
+Python module providing programmatic access to most of the settings accessed through the [Windows task view](https://en.wikipedia.org/wiki/Task_View).
 Including switching virtual desktops, moving windows between virtual desktops, pinning windows and listing the windows on a desktop.
 
 Originally based on https://github.com/Ciantic/VirtualDesktopAccessor.
