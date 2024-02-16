@@ -192,7 +192,6 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "GetPersistingStateName", (POINTER(PWSTR),)),
 ]
 
-# No change for 22449
 if BUILD_OVER_22631:
     GUID_IVirtualDesktop = GUID("{3F07F4BE-B107-441A-AF0F-39D82529072C}")
 elif BUILD_OVER_22621:
@@ -240,7 +239,6 @@ class IVirtualDesktop2(IUnknown):
     ]
 
 
-# Same GUID for 22449
 if BUILD_OVER_22631:
     GUID_IVirtualDesktopManagerInternal = GUID("{4970BA3D-FD4E-4647-BEA3-D89076EF4B9C}")
 elif BUILD_OVER_22621:
