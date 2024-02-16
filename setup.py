@@ -1,13 +1,18 @@
 from setuptools import setup, find_packages
 import os
-import pyvda
 
 def read(*names):
     return open(os.path.join(os.path.dirname(__file__), *names)).read()
 
+# done this way to avoid importing the package during setup
+def get_version():
+    contents = read("pyvda", "_version.py").strip()
+    version = contents.rpartition(" ")[2].strip('"')
+    return version
+
 setup(
     name="pyvda",
-    version=pyvda.__version__,
+    version=get_version(),
     description="Python implementation of the VirtualDesktopAccessor for manipulating Windows 10 virtual desktops.",
     author="Mike Roberts",
     author_email="mike.roberts.2k10@googlemail.com",
@@ -24,4 +29,3 @@ setup(
                    "Programming Language :: Python :: 3.7",
                   ],
 )
-

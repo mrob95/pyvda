@@ -34,8 +34,6 @@ Example
     AppView.current().pin()
 """
 
-__version__ = "0.3.2"
-
 import platform
 import os
 
@@ -62,3 +60,5 @@ from .pyvda import (
     get_virtual_desktops,
     set_wallpaper_for_all_desktops,
 )
+
+from ._version import __version__
