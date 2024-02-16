@@ -34,9 +34,34 @@ from comtypes import (
 )
 from .winstring import HSTRING
 
-if not os.getenv("READTHEDOCS"):
+
+def get_windows_build() -> int:
+    """From cpython source:
+
+        The members are named: major, minor, build, platform, service_pack,
+        service_pack_major, service_pack_minor, suite_mask, product_type and
+        platform_version. For backward compatibility, only the first 5 items
+        are available by indexing. All elements are numbers, except
+        service_pack and platform_type which are strings, and platform_version
+        which is a 3-tuple. Platform is always 2. Product_type may be 1 for a
+        workstation, 2 for a domain controller, 3 for a server.
+        Platform_version is a 3-tuple containing a version number that is
+        intended for identifying the OS rather than feature detection.
+
+    In https://github.com/mrob95/pyvda/issues/11 we switched to using
+    `platform_version` for feature detection, but this is not reliable
+    on new versions of Windows 11.
+    """
     winver = sys.getwindowsversion()
-    major, minor, build = winver.platform_version or winver[:3]
+    build = winver.build
+    # dodgy workaround for https://github.com/mrob95/pyvda/issues/11
+    if build < 10000 and winver.platform_version[2] > 10000:
+        build = winver.platform_version[2]
+    return build
+
+
+if not os.getenv("READTHEDOCS"):
+    build = get_windows_build()
     BUILD_OVER_20231 = build >= 20231
     BUILD_OVER_21313 = build >= 21313
     BUILD_OVER_22449 = build >= 22449
