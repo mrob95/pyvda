@@ -46,7 +46,7 @@ def _check_release():
 
 def _check_version():
     if platform.system() != "Windows" or not _check_release():
-        raise WindowsError(
+        raise NotImplementedError(
             "The virtual desktop feature is only available on Windows 10 and later."
         )
 

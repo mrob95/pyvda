@@ -398,7 +398,7 @@ class VirtualDesktop():
         if BUILD_OVER_21313:
             managers.manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
         else:
-            raise WindowsError("set_wallpaper is only available on Windows 11")
+            raise NotImplementedError("set_wallpaper is only available on Windows 11")
 
 
 def get_virtual_desktops() -> List[VirtualDesktop]:
@@ -420,4 +420,4 @@ def set_wallpaper_for_all_desktops(path: str):
     if BUILD_OVER_21313:
         managers.manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
     else:
-        raise WindowsError("set_wallpaper_for_all_desktops is only available on Windows 11")
+        raise NotImplementedError("set_wallpaper_for_all_desktops is only available on Windows 11")
