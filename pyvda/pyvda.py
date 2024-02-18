@@ -345,7 +345,7 @@ class VirtualDesktop():
         else:
             managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
 
-    def remove(self, fallback: VirtualDesktop = None):
+    def remove(self, fallback: Optional[VirtualDesktop] = None):
         """Delete this virtual desktop, falling back to 'fallback'.
 
         Args:
