@@ -10,6 +10,7 @@ from .com_defns import (
     IApplicationView,
     IVirtualDesktop,
     IVirtualDesktop2,
+    BUILD_OVER_19041,
     BUILD_OVER_21313,
 )
 from .utils import Managers
@@ -323,9 +324,15 @@ class VirtualDesktop():
 
         Returns:
             str: The desktop name.
+
+        Raises:
+            NotImplementedError: If the Windows version is < 19041.
         """
         if BUILD_OVER_21313:
             return str(self._virtual_desktop.GetName())
+
+        if not BUILD_OVER_19041:
+            raise NotImplementedError(f"{VirtualDesktop.name.__name__} is not supported on < 19041 versions")
 
         array = managers.manager_internal.get_all_desktops()
         for vd in array.iter(IVirtualDesktop2):
@@ -339,7 +346,13 @@ class VirtualDesktop():
 
         Args:
             name: The new name for this desktop.
+
+        Raises:
+            NotImplementedError: If the Windows version is < 19041.
         """
+        if not BUILD_OVER_19041:
+            raise NotImplementedError(f"{VirtualDesktop.rename.__name__} is not supported on < 19041 versions")
+
         if BUILD_OVER_21313:
             managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name))
         else:

@@ -62,12 +62,14 @@ def get_windows_build() -> int:
 
 if not os.getenv("READTHEDOCS"):
     build = get_windows_build()
+    BUILD_OVER_19041 = build >= 19041
     BUILD_OVER_20231 = build >= 20231
     BUILD_OVER_21313 = build >= 21313
     BUILD_OVER_22449 = build >= 22449
     BUILD_OVER_22621 = build >= 22621
     BUILD_OVER_22631 = build >= 22631
 else:
+    BUILD_OVER_19041 = False
     BUILD_OVER_20231 = False
     BUILD_OVER_21313 = False
     BUILD_OVER_22449 = False
