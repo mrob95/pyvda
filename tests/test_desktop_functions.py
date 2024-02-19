@@ -9,6 +9,9 @@ from pyvda import (
 import time
 import win32gui
 import threading
+import pytest
+
+from pyvda.com_defns import BUILD_OVER_19041
 
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
@@ -93,6 +96,13 @@ def test_create_and_remove_desktop():
     time.sleep(1) # Got to wait for the animation before we can return
     current_desktop.go()
 
+
+@pytest.mark.xfail(
+    condition=not BUILD_OVER_19041,
+    reason="<=18363 has no IVirtualDesktopManagerInternal2 manager",
+    raises=NotImplementedError,
+    strict=True
+)
 def test_desktop_names():
     current_name = current_desktop.name
     test_name = "pyvda testing"
@@ -100,6 +110,7 @@ def test_desktop_names():
     assert current_desktop.name == test_name, f"Wanted '{test_name}', got '{current_desktop.name}'"
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
+
 
 def test_move_and_go_threads():
     error: Optional[Exception] = None
