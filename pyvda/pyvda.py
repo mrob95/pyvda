@@ -332,7 +332,7 @@ class VirtualDesktop():
             return str(self._virtual_desktop.GetName())
 
         if not BUILD_OVER_19041:
-            raise NotImplementedError(f"{VirtualDesktop.name.__name__} is not supported on < 19041 versions")
+            raise NotImplementedError(f"{VirtualDesktop.name.fget.__name__} is not supported on < 19041 versions")
 
         array = managers.manager_internal.get_all_desktops()
         for vd in array.iter(IVirtualDesktop2):
