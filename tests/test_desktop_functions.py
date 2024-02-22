@@ -90,8 +90,8 @@ def test_create_and_remove_desktop():
     new.remove(fallback=VirtualDesktop(1))
     new_count = len(get_virtual_desktops())
     assert new_count == old_count, f"Wanted {new_count}, got {new_count}"
-    fellback = VirtualDesktop.current().number
-    assert fellback == 1, f"Wanted 1, got {fellback}"
+    fallback = VirtualDesktop.current().number
+    assert fallback == 1, f"Wanted 1, got {fallback}"
 
     time.sleep(1) # Got to wait for the animation before we can return
     current_desktop.go()
@@ -110,6 +110,17 @@ def test_desktop_names():
     assert current_desktop.name == test_name, f"Wanted '{test_name}', got '{current_desktop.name}'"
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
+
+
+def test_desktop_names_pre_19041(monkeypatch):
+    monkeypatch.setattr("pyvda.com_defns.BUILD_OVER_19041", False)
+    re_is_not_supported = r".* is not supported .*"
+
+    with pytest.raises(NotImplementedError, match=re_is_not_supported):
+        current_desktop.name
+
+    with pytest.raises(NotImplementedError, match=re_is_not_supported):
+        current_desktop.rename("Won't work")
 
 
 def test_move_and_go_threads():
