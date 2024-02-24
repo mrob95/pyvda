@@ -46,9 +46,6 @@ def _get_object(cls, clsid = None):
         raise
     return pObject
 
-def get_vd_manager():
-    return _get_object(IVirtualDesktopManager)
-
 def get_vd_manager_internal():
     return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
 
