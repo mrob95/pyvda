@@ -30,33 +30,7 @@ from comtypes import COMMETHOD, GUID, STDMETHOD, IUnknown
 import pyvda.build as build
 import pyvda.const as const
 from pyvda.com_base import PWSTR, REFGUID, REFIID, IObjectArray
-
-from .winstring import HSTRING
-
-
-def get_windows_build() -> int:
-    """From cpython source:
-
-        The members are named: major, minor, build, platform, service_pack,
-        service_pack_major, service_pack_minor, suite_mask, product_type and
-        platform_version. For backward compatibility, only the first 5 items
-        are available by indexing. All elements are numbers, except
-        service_pack and platform_type which are strings, and platform_version
-        which is a 3-tuple. Platform is always 2. Product_type may be 1 for a
-        workstation, 2 for a domain controller, 3 for a server.
-        Platform_version is a 3-tuple containing a version number that is
-        intended for identifying the OS rather than feature detection.
-
-    In https://github.com/mrob95/pyvda/issues/11 we switched to using
-    `platform_version` for feature detection, but this is not reliable
-    on new versions of Windows 11.
-    """
-    winver = sys.getwindowsversion()
-    build = winver.build
-    # dodgy workaround for https://github.com/mrob95/pyvda/issues/11
-    if build < 10000 and winver.platform_version[2] > 10000:
-        build = winver.platform_version[2]
-    return build
+from pyvda.winstring import HSTRING
 
 CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")
 CLSID_VirtualDesktopManagerInternal = GUID("{C5E0CDCA-7B6E-41B2-9FC4-D93975CC467B}")
