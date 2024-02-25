@@ -1,25 +1,21 @@
 import logging
-from typing import Optional
-import threading
-import _ctypes
-from ctypes import POINTER
-from comtypes import (
-    CoInitializeEx,
-    CoCreateInstance,
-    CLSCTX_LOCAL_SERVER,
-)
 import sys
-from pyvda.com_base import (
-    IServiceProvider,
-)
+import threading
+from ctypes import POINTER
+from typing import Optional
+
+import _ctypes
+from comtypes import CLSCTX_LOCAL_SERVER, CoCreateInstance, CoInitializeEx
+
+from pyvda.com_base import IServiceProvider
 from pyvda.com_defns import (
+    CLSID_ImmersiveShell,
+    CLSID_VirtualDesktopManagerInternal,
     CLSID_VirtualDesktopPinnedApps,
+    IApplicationViewCollection,
     IVirtualDesktopManagerInternal,
     IVirtualDesktopManagerInternal2,
     IVirtualDesktopPinnedApps,
-    IApplicationViewCollection,
-    CLSID_ImmersiveShell,
-    CLSID_VirtualDesktopManagerInternal,
 )
 
 logger = logging.getLogger(__name__)

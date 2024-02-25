@@ -34,8 +34,9 @@ Example
     AppView.current().pin()
 """
 
-import platform
 import os
+import platform
+
 
 def _check_release():
     try:
@@ -53,12 +54,11 @@ def _check_version():
 if not os.getenv("READTHEDOCS"):
     _check_version()
 
+from ._version import __version__
 from .pyvda import (
     AppView,
-    get_apps_by_z_order,
     VirtualDesktop,
+    get_apps_by_z_order,
     get_virtual_desktops,
     set_wallpaper_for_all_desktops,
 )
-
-from ._version import __version__

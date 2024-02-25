@@ -1,17 +1,8 @@
-from ctypes import c_ulonglong, POINTER, HRESULT
-from ctypes.wintypes import (
-    UINT,
-    WCHAR,
-    LPVOID,
-)
+from ctypes import HRESULT, POINTER, c_ulonglong
+from ctypes.wintypes import LPVOID, UINT, WCHAR
 from typing import Any, Iterator
-from comtypes import (
-    IUnknown,
-    GUID,
-    STDMETHOD,
-    COMMETHOD,
-)
 
+from comtypes import COMMETHOD, GUID, STDMETHOD, IUnknown
 
 PWSTR = POINTER(WCHAR)
 REFGUID = POINTER(GUID)

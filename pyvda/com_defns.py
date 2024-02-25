@@ -9,36 +9,30 @@ References:
         * http://grabacr.net/archives/5601
         * https://www.cyberforum.ru/blogs/105416/blog3671.html
 """
-import sys
 import os
-import pyvda.const as const
-from ctypes import POINTER, HRESULT, c_ulonglong
+import sys
+from ctypes import HRESULT, POINTER, c_ulonglong
 from ctypes.wintypes import (
-    UINT,
-    INT,
-    LPVOID,
-    ULONG,
-    HWND,
-    RECT,
-    LPCWSTR,
     BOOL,
-    SIZE,
     DWORD,
+    HWND,
+    INT,
+    LPCWSTR,
+    LPVOID,
+    RECT,
+    SIZE,
+    UINT,
+    ULONG,
 )
-from comtypes import (
-    IUnknown,
-    GUID,
-    STDMETHOD,
-    COMMETHOD,
-)
-from .winstring import HSTRING
-from pyvda.com_base import (
-    IObjectArray,
-    REFGUID,
-    REFIID,
-    PWSTR,
-)
+
+from comtypes import COMMETHOD, GUID, STDMETHOD, IUnknown
+
 import pyvda.build as build
+import pyvda.const as const
+from pyvda.com_base import PWSTR, REFGUID, REFIID, IObjectArray
+
+from .winstring import HSTRING
+
 
 def get_windows_build() -> int:
     """From cpython source:

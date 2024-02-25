@@ -1,17 +1,13 @@
-from comtypes import CoInitializeEx, COINIT_MULTITHREADED
-from typing import Optional
-from pyvda import (
-    AppView,
-    VirtualDesktop,
-    get_virtual_desktops,
-    get_apps_by_z_order,
-)
-import time
-import win32gui
-import threading
-import pytest
 import sys
+import threading
+import time
+from typing import Optional
 
+import pytest
+import win32gui
+from comtypes import COINIT_MULTITHREADED, CoInitializeEx
+
+from pyvda import AppView, VirtualDesktop, get_apps_by_z_order, get_virtual_desktops
 
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()

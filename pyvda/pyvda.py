@@ -1,18 +1,15 @@
 from __future__ import annotations
 
+from ctypes import windll
 from typing import List, Optional
 
 from comtypes import GUID
-from ctypes import windll
 
-from .winstring import HSTRING
-from .com_defns import (
-    IApplicationView,
-    IVirtualDesktop,
-    IVirtualDesktop2,
-)
 import pyvda.build as build
+
+from .com_defns import IApplicationView, IVirtualDesktop, IVirtualDesktop2
 from .utils import Managers
+from .winstring import HSTRING
 
 ASFW_ANY = -1
 NULL_PTR = 0
