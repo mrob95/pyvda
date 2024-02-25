@@ -281,7 +281,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "Unknown6", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "Unknown7"),
         ]
-    if BUILD_OVER_22621:
+    elif BUILD_OVER_22621:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
