@@ -1,25 +1,21 @@
 import logging
-import threading
-import _ctypes
-from ctypes import POINTER
-from comtypes import (
-    CoInitializeEx,
-    CoCreateInstance,
-    CLSCTX_LOCAL_SERVER,
-)
 import sys
-from .com_defns import (
+import threading
+from ctypes import POINTER
+from typing import Optional
+
+import _ctypes
+from comtypes import CLSCTX_LOCAL_SERVER, CoCreateInstance, CoInitializeEx
+
+from pyvda.com_base import IServiceProvider
+from pyvda.com_defns import (
+    CLSID_ImmersiveShell,
+    CLSID_VirtualDesktopManagerInternal,
     CLSID_VirtualDesktopPinnedApps,
-    IVirtualDesktopManager,
+    IApplicationViewCollection,
     IVirtualDesktopManagerInternal,
     IVirtualDesktopManagerInternal2,
     IVirtualDesktopPinnedApps,
-    IApplicationViewCollection,
-    IServiceProvider,
-    CLSID_ImmersiveShell,
-    CLSID_VirtualDesktopManagerInternal,
-    BUILD_OVER_19041,
-    BUILD_OVER_21313,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,7 +27,7 @@ def _get_object(cls, clsid = None):
             CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
         )
         pObject = POINTER(cls)()
-        pServiceProvider.QueryService(
+        pServiceProvider.QueryService( # type: ignore
             clsid or cls._iid_,
             cls._iid_,
             pObject,
@@ -46,14 +42,14 @@ def _get_object(cls, clsid = None):
         raise
     return pObject
 
-def get_vd_manager():
-    return _get_object(IVirtualDesktopManager)
-
 def get_vd_manager_internal():
     return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
 
-def get_vd_manager_internal2():
-    return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal)
+def get_vd_manager_internal2() -> Optional[IVirtualDesktopManagerInternal2]:
+    try:
+        return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal) # type: ignore
+    except _ctypes.COMError :
+        return None
 
 def get_view_collection():
     return _get_object(IApplicationViewCollection)
@@ -67,10 +63,7 @@ class Managers(threading.local):
         self.manager_internal = get_vd_manager_internal()
         self.view_collection = get_view_collection()
         self.pinned_apps = get_pinned_apps()
-
-        # Old interface only used for SetName
-        if not BUILD_OVER_21313 and BUILD_OVER_19041:
-            self.manager_internal2 = get_vd_manager_internal2()
+        self.manager_internal2 = get_vd_manager_internal2()
 
     @staticmethod
     def try_init_com():

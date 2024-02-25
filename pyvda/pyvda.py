@@ -1,19 +1,14 @@
 from __future__ import annotations
 
+from ctypes import windll
 from typing import List, Optional
 
 from comtypes import GUID
-from ctypes import windll
 
-from .winstring import HSTRING
-from .com_defns import (
-    IApplicationView,
-    IVirtualDesktop,
-    IVirtualDesktop2,
-    BUILD_OVER_19041,
-    BUILD_OVER_21313,
-)
-from .utils import Managers
+import pyvda.build as build
+from pyvda.com_defns import IApplicationView, IVirtualDesktop, IVirtualDesktop2
+from pyvda.utils import Managers
+from pyvda.winstring import HSTRING
 
 ASFW_ANY = -1
 NULL_PTR = 0
@@ -31,7 +26,7 @@ class AppView():
 
     """
 
-    def __init__(self, hwnd: int = None, view: 'IApplicationView' = None):
+    def __init__(self, hwnd: Optional[int] = None, view: Optional['IApplicationView'] = None):
         """One of the following parameters must be provided:
 
         Args:
@@ -328,10 +323,10 @@ class VirtualDesktop():
         Raises:
             NotImplementedError: If the Windows version is < 19041.
         """
-        if BUILD_OVER_21313:
+        if build.OVER_21313:
             return str(self._virtual_desktop.GetName())
 
-        if not BUILD_OVER_19041:
+        if not build.OVER_19041:
             raise NotImplementedError(f"{VirtualDesktop.name.fget.__name__} is not supported on < 19041 versions")
 
         array = managers.manager_internal.get_all_desktops()
@@ -350,13 +345,15 @@ class VirtualDesktop():
         Raises:
             NotImplementedError: If the Windows version is < 19041.
         """
-        if not BUILD_OVER_19041:
+
+        if managers.manager_internal2 is not None:
+            managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
+            return
+
+        if not build.OVER_19041:
             raise NotImplementedError(f"{VirtualDesktop.rename.__name__} is not supported on < 19041 versions")
 
-        if BUILD_OVER_21313:
-            managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name))
-        else:
-            managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
+        managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name))
 
     def remove(self, fallback: Optional[VirtualDesktop] = None):
         """Delete this virtual desktop, falling back to 'fallback'.
@@ -408,7 +405,7 @@ class VirtualDesktop():
         Args:
             path (str): path to wallpaper file
         """
-        if BUILD_OVER_21313:
+        if build.OVER_21313:
             managers.manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
         else:
             raise NotImplementedError("set_wallpaper is only available on Windows 11")
@@ -430,7 +427,7 @@ def set_wallpaper_for_all_desktops(path: str):
     Args:
         path (str): path to wallpaper file
     """
-    if BUILD_OVER_21313:
+    if build.OVER_21313:
         managers.manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
     else:
         raise NotImplementedError("set_wallpaper_for_all_desktops is only available on Windows 11")
