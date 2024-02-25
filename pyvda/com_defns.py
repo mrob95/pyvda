@@ -375,12 +375,6 @@ class IVirtualDesktopManagerInternal(IUnknown):
     def get_all_desktops(self) -> IObjectArray:
         if BUILD_OVER_22621:
             return self.GetDesktops()
-        elif BUILD_OVER_22449:
-            # See https://github.com/mrob95/pyvda/issues/15#issuecomment-1146642608 for
-            # discussion/theorising about this. Unclear at this point where MS are
-            # going with it. Could probably be zero but don't want to break it when
-            # I don't have a test machine.
-            return self.GetDesktops(1)
         elif BUILD_OVER_20231:
             return self.GetDesktops(0)
         else:
