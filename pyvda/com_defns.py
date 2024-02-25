@@ -12,11 +12,10 @@ References:
 import sys
 import os
 import pyvda.const as const
-from ctypes import c_ulonglong, POINTER, Structure, HRESULT
+from ctypes import POINTER, HRESULT, c_ulonglong
 from ctypes.wintypes import (
     UINT,
     INT,
-    WCHAR,
     LPVOID,
     ULONG,
     HWND,
@@ -26,7 +25,6 @@ from ctypes.wintypes import (
     SIZE,
     DWORD,
 )
-from typing import Any, Iterator
 from comtypes import (
     IUnknown,
     GUID,
@@ -34,7 +32,12 @@ from comtypes import (
     COMMETHOD,
 )
 from .winstring import HSTRING
-
+from pyvda.com_base import (
+    IObjectArray,
+    REFGUID,
+    REFIID,
+    PWSTR,
+)
 
 def get_windows_build() -> int:
     """From cpython source:
@@ -97,35 +100,6 @@ IApplicationViewChangeListener = UINT
 TrustLevel = INT
 AdjacentDesktop = UINT
 
-ULONGLONG = c_ulonglong
-PWSTR = POINTER(WCHAR)
-REFGUID = POINTER(GUID)
-REFIID = POINTER(GUID)
-
-
-class IServiceProvider(IUnknown):
-    _iid_ = GUID("{6D5140C1-7436-11CE-8034-00AA006009FA}")
-    _methods_ = [
-        STDMETHOD(HRESULT, "QueryService", (REFGUID, REFIID, POINTER(LPVOID),)),
-    ]
-
-
-class IObjectArray(IUnknown):
-    _iid_ = GUID("{92CA9DCD-5622-4BBA-A805-5E9F541BD8C9}")
-    _methods_ = [
-        COMMETHOD([], HRESULT, "GetCount", (["out"], POINTER(UINT), "pcObjects"),),
-        STDMETHOD(HRESULT, "GetAt", (UINT, REFIID, POINTER(LPVOID),)),
-    ]
-
-    def get_at(self, i: int, cls: Any) -> Any:
-        item = POINTER(cls)()
-        self.GetAt(i, cls._iid_, item)
-        return item
-
-    def iter(self, cls: Any) -> Iterator[Any]:
-        for i in range(self.GetCount()):
-            yield self.get_at(i, cls)
-
 
 # Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{372E1D3B-38D3-42E4-A15B-8AB2B178F513}
 # Found with searching "IApplicationView"
@@ -155,8 +129,8 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "GetViewState", (POINTER(UINT),)),
     STDMETHOD(HRESULT, "SetViewState", (UINT,)),
     STDMETHOD(HRESULT, "GetNeediness", (POINTER(UINT),)),
-    COMMETHOD([], HRESULT, "GetLastActivationTimestamp", (["out"], POINTER(ULONGLONG), "pGuid")),
-    STDMETHOD(HRESULT, "SetLastActivationTimestamp", (ULONGLONG,)),
+    COMMETHOD([], HRESULT, "GetLastActivationTimestamp", (["out"], POINTER(c_ulonglong), "pGuid")),
+    STDMETHOD(HRESULT, "SetLastActivationTimestamp", (c_ulonglong,)),
     COMMETHOD([], HRESULT, "GetVirtualDesktopId", (["out"], POINTER(GUID), "pGuid")),
     STDMETHOD(HRESULT, "SetVirtualDesktopId", (REFGUID,)),
     COMMETHOD([], HRESULT, "GetShowInSwitchers", (["out"], POINTER(UINT), "pShown")),

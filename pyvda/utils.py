@@ -8,14 +8,15 @@ from comtypes import (
     CLSCTX_LOCAL_SERVER,
 )
 import sys
-from .com_defns import (
+from pyvda.com_base import (
+    IServiceProvider,
+)
+from pyvda.com_defns import (
     CLSID_VirtualDesktopPinnedApps,
-    IVirtualDesktopManager,
     IVirtualDesktopManagerInternal,
     IVirtualDesktopManagerInternal2,
     IVirtualDesktopPinnedApps,
     IApplicationViewCollection,
-    IServiceProvider,
     CLSID_ImmersiveShell,
     CLSID_VirtualDesktopManagerInternal,
     BUILD_OVER_19041,
