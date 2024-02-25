@@ -11,6 +11,7 @@ References:
 """
 import sys
 import os
+import pyvda.const as const
 from ctypes import c_ulonglong, POINTER, Structure, HRESULT
 from ctypes.wintypes import (
     UINT,
@@ -195,15 +196,15 @@ IApplicationView._methods_ = [
 ]
 
 if BUILD_OVER_22631:
-    GUID_IVirtualDesktop = GUID("{3F07F4BE-B107-441A-AF0F-39D82529072C}")
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22631
 elif BUILD_OVER_22621:
-    GUID_IVirtualDesktop = GUID("{3F07F4BE-B107-441A-AF0F-39D82529072C}")
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22621
 elif BUILD_OVER_21313:
-    GUID_IVirtualDesktop = GUID("{536D3495-B208-4CC9-AE26-DE8111275BF8}")
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_21313
 elif BUILD_OVER_20231:
-    GUID_IVirtualDesktop = GUID("{62FDF88B-11CA-4AFB-8BD8-2296DFAE49E2}")
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_20231
 else:
-    GUID_IVirtualDesktop = GUID("{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}")
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_9000
 
 # In registry: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}
 class IVirtualDesktop(IUnknown):
@@ -242,15 +243,15 @@ class IVirtualDesktop2(IUnknown):
 
 
 if BUILD_OVER_22631:
-    GUID_IVirtualDesktopManagerInternal = GUID("{4970BA3D-FD4E-4647-BEA3-D89076EF4B9C}")
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22631
 elif BUILD_OVER_22621:
-    GUID_IVirtualDesktopManagerInternal = GUID("{A3175F2D-239C-4BD2-8AA0-EEBA8B0B138E}")
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22621
 elif BUILD_OVER_21313:
-    GUID_IVirtualDesktopManagerInternal = GUID("{B2F925B9-5A0F-4D2E-9F4D-2B1507593C10}")
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_21313
 elif BUILD_OVER_20231:
-    GUID_IVirtualDesktopManagerInternal = GUID("{094AFE11-44F2-4BA0-976F-29A97E263EE0}")
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_20231
 else:
-    GUID_IVirtualDesktopManagerInternal = GUID("{F31574D6-B682-4CDC-BD56-1827860ABEC6}")
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_9000
 
 # HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{F31574D6-B682-4CDC-BD56-1827860ABEC6}
 class IVirtualDesktopManagerInternal(IUnknown):
@@ -308,7 +309,9 @@ class IVirtualDesktopManagerInternal(IUnknown):
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
             STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
             COMMETHOD([], HRESULT, "GetCurrentDesktop", (["in"], HWND, "hwnd"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            # added since 21313 without a change of GUID:
             COMMETHOD([], HRESULT, "GetAllCurrentDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
+            #
             COMMETHOD([], HRESULT, "GetDesktops", (["in"], HWND, "hwnd"), (["out"], POINTER(POINTER(IObjectArray)), "array")),
             STDMETHOD(HRESULT, "GetAdjacentDesktop", (POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),)),
             STDMETHOD(HRESULT, "SwitchDesktop", (HWND, POINTER(IVirtualDesktop),)),
