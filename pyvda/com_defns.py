@@ -38,6 +38,7 @@ from pyvda.com_base import (
     REFIID,
     PWSTR,
 )
+import pyvda.build as build
 
 def get_windows_build() -> int:
     """From cpython source:
@@ -62,24 +63,6 @@ def get_windows_build() -> int:
     if build < 10000 and winver.platform_version[2] > 10000:
         build = winver.platform_version[2]
     return build
-
-
-if not os.getenv("READTHEDOCS"):
-    build = get_windows_build()
-    BUILD_OVER_19041 = build >= 19041
-    BUILD_OVER_20231 = build >= 20231
-    BUILD_OVER_21313 = build >= 21313
-    BUILD_OVER_22449 = build >= 22449
-    BUILD_OVER_22621 = build >= 22621
-    BUILD_OVER_22631 = build >= 22631
-else:
-    BUILD_OVER_19041 = False
-    BUILD_OVER_20231 = False
-    BUILD_OVER_21313 = False
-    BUILD_OVER_22449 = False
-    BUILD_OVER_22621 = False
-    BUILD_OVER_22631 = False
-
 
 CLSID_ImmersiveShell = GUID("{C2F03A33-21F5-47FA-B4BB-156362A2F239}")
 CLSID_VirtualDesktopManagerInternal = GUID("{C5E0CDCA-7B6E-41B2-9FC4-D93975CC467B}")
@@ -169,13 +152,13 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "GetPersistingStateName", (POINTER(PWSTR),)),
 ]
 
-if BUILD_OVER_22631:
+if build.OVER_22631:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22631
-elif BUILD_OVER_22621:
+elif build.OVER_22621:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22621
-elif BUILD_OVER_21313:
+elif build.OVER_21313:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_21313
-elif BUILD_OVER_20231:
+elif build.OVER_20231:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_20231
 else:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_9000
@@ -183,7 +166,7 @@ else:
 # In registry: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}
 class IVirtualDesktop(IUnknown):
     _iid_ = GUID_IVirtualDesktop
-    if BUILD_OVER_22621:
+    if build.OVER_22621:
         _methods_ = [
             STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
             COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
@@ -191,7 +174,7 @@ class IVirtualDesktop(IUnknown):
             COMMETHOD([], HRESULT, "GetWallpaperPath", (["out"], POINTER(HSTRING), "pPath"),),
             COMMETHOD([], HRESULT, "IsRemote", (["out"], POINTER(HWND), "pW"), ),
         ]
-    elif BUILD_OVER_21313:
+    elif build.OVER_21313:
         _methods_ = [
             STDMETHOD(HRESULT, "IsViewVisible", (POINTER(IApplicationView), POINTER(UINT))),
             COMMETHOD([], HRESULT, "GetID", (["out"], POINTER(GUID), "pGuid"),),
@@ -216,13 +199,13 @@ class IVirtualDesktop2(IUnknown):
     ]
 
 
-if BUILD_OVER_22631:
+if build.OVER_22631:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22631
-elif BUILD_OVER_22621:
+elif build.OVER_22621:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22621
-elif BUILD_OVER_21313:
+elif build.OVER_21313:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_21313
-elif BUILD_OVER_20231:
+elif build.OVER_20231:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_20231
 else:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_9000
@@ -230,7 +213,7 @@ else:
 # HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{F31574D6-B682-4CDC-BD56-1827860ABEC6}
 class IVirtualDesktopManagerInternal(IUnknown):
     _iid_ = GUID_IVirtualDesktopManagerInternal
-    if BUILD_OVER_22631:
+    if build.OVER_22631:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -256,7 +239,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "Unknown6", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
             STDMETHOD(HRESULT, "Unknown7"),
         ]
-    elif BUILD_OVER_22621:
+    elif build.OVER_22621:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -277,7 +260,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "GetDesktopPerMonitor", (["out"], POINTER(BOOL), "state")),
             COMMETHOD([], HRESULT, "SetDesktopPerMonitor", (["in"], BOOL, "state")),
         ]
-    elif BUILD_OVER_22449:
+    elif build.OVER_22449:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount", (["in"], HWND, "hwnd"), (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -301,7 +284,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "GetDesktopPerMonitor", (["out"], POINTER(BOOL), "state")),
             COMMETHOD([], HRESULT, "SetDesktopPerMonitor", (["in"], BOOL, "state")),
         ]
-    elif BUILD_OVER_21313:
+    elif build.OVER_21313:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount", (["in"], HWND, "hwnd"), (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -322,7 +305,7 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "GetDesktopPerMonitor", (["out"], POINTER(BOOL), "state")),
             COMMETHOD([], HRESULT, "SetDesktopPerMonitor", (["in"], BOOL, "state")),
         ]
-    elif BUILD_OVER_20231:
+    elif build.OVER_20231:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount", (["in"], HWND, "hwnd"), (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
@@ -350,33 +333,33 @@ class IVirtualDesktopManagerInternal(IUnknown):
         ]
 
     def get_all_desktops(self) -> IObjectArray:
-        if BUILD_OVER_22621:
+        if build.OVER_22621:
             return self.GetDesktops()
-        elif BUILD_OVER_20231:
+        elif build.OVER_20231:
             return self.GetDesktops(0)
         else:
             return self.GetDesktops()
 
     def get_current_desktop(self) -> IVirtualDesktop:
-        if BUILD_OVER_22621:
+        if build.OVER_22621:
             return self.GetCurrentDesktop()
-        elif BUILD_OVER_20231:
+        elif build.OVER_20231:
             return self.GetCurrentDesktop(0)
         else:
             return self.GetCurrentDesktop()
 
     def create_desktop(self) -> IVirtualDesktop:
-        if BUILD_OVER_22621:
+        if build.OVER_22621:
             return self.CreateDesktopW()
-        elif BUILD_OVER_20231:
+        elif build.OVER_20231:
             return self.CreateDesktopW(0)
         else:
             return self.CreateDesktopW()
 
     def switch_desktop(self, target: IVirtualDesktop) -> IVirtualDesktop:
-        if BUILD_OVER_22621:
+        if build.OVER_22621:
             return self.SwitchDesktop(target)
-        elif BUILD_OVER_20231:
+        elif build.OVER_20231:
             return self.SwitchDesktop(0, target)
         else:
             return self.SwitchDesktop(target)

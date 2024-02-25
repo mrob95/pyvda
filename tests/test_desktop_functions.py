@@ -10,8 +10,8 @@ import time
 import win32gui
 import threading
 import pytest
+import sys
 
-from pyvda.com_defns import BUILD_OVER_19041
 
 current_window = AppView.current()
 current_desktop = VirtualDesktop.current()
@@ -98,7 +98,7 @@ def test_create_and_remove_desktop():
 
 
 @pytest.mark.xfail(
-    condition=not BUILD_OVER_19041,
+    condition=not sys.getwindowsversion().build >= 19041,
     reason="<=18363 has no IVirtualDesktopManagerInternal2 manager",
     raises=NotImplementedError,
     strict=True
@@ -111,7 +111,7 @@ def test_desktop_names():
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
 
-@pytest.mark.skipif(BUILD_OVER_19041, reason="Only for builds <=19041")
+@pytest.mark.skipif(sys.getwindowsversion().build >= 19041, reason="Only for builds <=19041")
 def test_desktop_names_pre_19041():
     re_is_not_supported = r".* is not supported .*"
 

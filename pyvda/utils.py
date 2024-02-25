@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import threading
 import _ctypes
 from ctypes import POINTER
@@ -19,8 +20,6 @@ from pyvda.com_defns import (
     IApplicationViewCollection,
     CLSID_ImmersiveShell,
     CLSID_VirtualDesktopManagerInternal,
-    BUILD_OVER_19041,
-    BUILD_OVER_21313,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,7 +31,7 @@ def _get_object(cls, clsid = None):
             CLSID_ImmersiveShell, IServiceProvider, CLSCTX_LOCAL_SERVER
         )
         pObject = POINTER(cls)()
-        pServiceProvider.QueryService(
+        pServiceProvider.QueryService( # type: ignore
             clsid or cls._iid_,
             cls._iid_,
             pObject,
@@ -50,8 +49,11 @@ def _get_object(cls, clsid = None):
 def get_vd_manager_internal():
     return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
 
-def get_vd_manager_internal2():
-    return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal)
+def get_vd_manager_internal2() -> Optional[IVirtualDesktopManagerInternal2]:
+    try:
+        return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal) # type: ignore
+    except _ctypes.COMError :
+        return None
 
 def get_view_collection():
     return _get_object(IApplicationViewCollection)
@@ -65,10 +67,7 @@ class Managers(threading.local):
         self.manager_internal = get_vd_manager_internal()
         self.view_collection = get_view_collection()
         self.pinned_apps = get_pinned_apps()
-
-        # Old interface only used for SetName
-        if not BUILD_OVER_21313 and BUILD_OVER_19041:
-            self.manager_internal2 = get_vd_manager_internal2()
+        self.manager_internal2 = get_vd_manager_internal2()
 
     @staticmethod
     def try_init_com():
