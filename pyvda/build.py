@@ -34,6 +34,7 @@ def try_create_manager(guid: GUID) -> bool:
     except _ctypes.COMError as e:
         logger.debug(f"Querying {guid}... {e.text}")
         return False
+    logger.debug(f"Querying {guid}... Success!")
     return True
 
 def do_feature_detection():
@@ -47,7 +48,10 @@ def do_feature_detection():
     if os.getenv("READTHEDOCS"):
         return
 
+    logger.debug("Starting feature detection...")
+
     if try_create_manager(const.GUID_IVirtualDesktopManagerInternal_22631):
+        logger.debug("Feature detection complete. Windows version is over 22631")
         OVER_19041 = True
         OVER_20231 = True
         OVER_21313 = True
@@ -57,6 +61,7 @@ def do_feature_detection():
         return
 
     if try_create_manager(const.GUID_IVirtualDesktopManagerInternal_22621):
+        logger.debug("Feature detection complete. Windows version is over 22621")
         OVER_19041 = True
         OVER_20231 = True
         OVER_21313 = True
@@ -70,22 +75,34 @@ def do_feature_detection():
         OVER_21313 = True
         # ideally we would avoid this, but 22449 changed
         # a method without updating the guid.
-        if sys.getwindowsversion().build >= 22449:
+        build = sys.getwindowsversion().build
+        if build >= 22449:
+            logger.debug("Feature detection complete. Windows version is over 22449")
             OVER_22449 = True
+            return
+        logger.debug(f"Feature detection complete. Windows version is over 21313 (build was {build})")
         return
 
     if try_create_manager(const.GUID_IVirtualDesktopManagerInternal_20231):
+        logger.debug("Feature detection complete. Windows version is over 20231")
         OVER_19041 = True
         OVER_20231 = True
         return
 
     if not try_create_manager(const.GUID_IVirtualDesktopManagerInternal_9000):
         raise NotImplementedError(
-            f"Interface IVirtualDesktopManagerInternal not supported for windows version {sys.getwindowsversion().major}.{sys.getwindowsversion().minor}.{sys.getwindowsversion().build}. Please open an issue at https://github.com/mrob95/pyvda/issues."
+            f"""
+    No supported IVirtualDesktopManagerInternal interface found.
+        * Windows version is {sys.getwindowsversion()}
+        * Platform version is {sys.getwindowsversion().platform_version}
+    Please run with debug logging enabled and then open an issue at https://github.com/mrob95/pyvda/issues containing the complete output."""
         )
 
     if sys.getwindowsversion().build >= 19041:
+        logger.debug("Feature detection complete. Windows version is over 19041")
         OVER_19041 = True
         return
+
+    logger.debug("Feature detection complete. Windows version is under 19041")
 
 do_feature_detection()
