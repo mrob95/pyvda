@@ -111,9 +111,8 @@ def test_desktop_names():
     current_desktop.rename(current_name)
     assert current_desktop.name == current_name, f"Wanted '{current_name}', got '{current_desktop.name}'"
 
-
-def test_desktop_names_pre_19041(monkeypatch):
-    monkeypatch.setattr("pyvda.com_defns.BUILD_OVER_19041", False)
+@pytest.mark.skipif(BUILD_OVER_19041, reason="Only for builds <=19041")
+def test_desktop_names_pre_19041():
     re_is_not_supported = r".* is not supported .*"
 
     with pytest.raises(NotImplementedError, match=re_is_not_supported):
