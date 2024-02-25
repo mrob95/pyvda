@@ -6,10 +6,9 @@ from typing import List, Optional
 from comtypes import GUID
 
 import pyvda.build as build
-
-from .com_defns import IApplicationView, IVirtualDesktop, IVirtualDesktop2
-from .utils import Managers
-from .winstring import HSTRING
+from pyvda.com_defns import IApplicationView, IVirtualDesktop, IVirtualDesktop2
+from pyvda.utils import Managers
+from pyvda.winstring import HSTRING
 
 ASFW_ANY = -1
 NULL_PTR = 0
