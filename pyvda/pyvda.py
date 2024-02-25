@@ -27,7 +27,7 @@ class AppView():
 
     """
 
-    def __init__(self, hwnd: int = None, view: 'IApplicationView' = None):
+    def __init__(self, hwnd: Optional[int] = None, view: Optional['IApplicationView'] = None):
         """One of the following parameters must be provided:
 
         Args:
