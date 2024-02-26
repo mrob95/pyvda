@@ -35,7 +35,7 @@ class AppView():
         """
         if hwnd:
             # Get the IApplicationView for the window
-            self._view = managers.view_collection.GetViewForHwnd(hwnd)
+            self._view = managers.view_collection.GetViewForHwnd(hwnd) # type: ignore
         elif view:
             self._view = view
         else:
@@ -48,13 +48,13 @@ class AppView():
     def hwnd(self) -> int:
         """This window's handle.
         """
-        return self._view.GetThumbnailWindow()
+        return self._view.GetThumbnailWindow() # type: ignore
 
     @property
     def app_id(self) -> int:
         """The ID of this window's app.
         """
-        return self._view.GetAppUserModelId()
+        return self._view.GetAppUserModelId() # type: ignore
 
     @classmethod
     def current(cls):
@@ -62,7 +62,7 @@ class AppView():
         Returns:
             AppView: An AppView for the currently focused window.
         """
-        focused = managers.view_collection.GetViewInFocus()
+        focused = managers.view_collection.GetViewInFocus() # type: ignore
         return cls(view=focused)
 
     #  ------------------------------------------------
@@ -71,26 +71,26 @@ class AppView():
     def is_shown_in_switchers(self) -> bool:
         """Is the view shown in the alt-tab view?
         """
-        return bool(self._view.GetShowInSwitchers())
+        return bool(self._view.GetShowInSwitchers()) # type: ignore
 
     def is_visible(self) -> bool:
         """Is the view visible?
         """
-        return bool(self._view.GetVisibility())
+        return bool(self._view.GetVisibility()) # type: ignore
 
     def get_activation_timestamp(self) -> int:
         """Get the last activation timestamp for this window.
         """
-        return self._view.GetLastActivationTimestamp()
+        return self._view.GetLastActivationTimestamp() # type: ignore
 
     def set_focus(self):
         """Focus the window"""
-        return self._view.SetFocus()
+        return self._view.SetFocus() # type: ignore
 
     def switch_to(self):
         """Switch to the window. Behaves slightly differently to set_focus -
         this is what is called when you use the alt-tab menu."""
-        return self._view.SwitchTo()
+        return self._view.SwitchTo() # type: ignore
 
 
     #  ------------------------------------------------
@@ -100,13 +100,13 @@ class AppView():
         """
         Pin the window (corresponds to the 'show window on all desktops' toggle).
         """
-        managers.pinned_apps.PinView(self._view)
+        managers.pinned_apps.PinView(self._view) # type: ignore
 
     def unpin(self):
         """
         Unpin the window (corresponds to the 'show window on all desktops' toggle).
         """
-        managers.pinned_apps.UnpinView(self._view)
+        managers.pinned_apps.UnpinView(self._view) # type: ignore
 
     def is_pinned(self) -> bool:
         """
@@ -115,19 +115,19 @@ class AppView():
         Returns:
             bool: is the window pinned?
         """
-        return managers.pinned_apps.IsViewPinned(self._view)
+        return managers.pinned_apps.IsViewPinned(self._view) # type: ignore
 
     def pin_app(self):
         """
         Pin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
-        managers.pinned_apps.PinAppID(self.app_id)
+        managers.pinned_apps.PinAppID(self.app_id) # type: ignore
 
     def unpin_app(self):
         """
         Unpin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
-        managers.pinned_apps.UnpinAppID(self.app_id)
+        managers.pinned_apps.UnpinAppID(self.app_id) # type: ignore
 
     def is_app_pinned(self) -> bool:
         """
@@ -136,7 +136,7 @@ class AppView():
         Returns:
             bool: is the app pinned?.
         """
-        return managers.pinned_apps.IsAppIdPinned(self.app_id)
+        return managers.pinned_apps.IsAppIdPinned(self.app_id) # type: ignore
 
 
     #  ------------------------------------------------
@@ -153,7 +153,7 @@ class AppView():
                 >>> AppView.current().move_to_desktop(VirtualDesktop(1))
 
         """
-        managers.manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)
+        managers.manager_internal.MoveViewToDesktop(self._view, desktop._virtual_desktop)  # type: ignore
 
     @property
     def desktop_id(self) -> GUID:
@@ -161,7 +161,7 @@ class AppView():
         Returns:
             GUID -- The ID of the desktop which the window is on.
         """
-        return self._view.GetVirtualDesktopId()
+        return self._view.GetVirtualDesktopId() # type: ignore
 
     @property
     def desktop(self) -> VirtualDesktop:
@@ -207,7 +207,7 @@ def get_apps_by_z_order(switcher_windows: bool = True, current_desktop: bool = T
     Returns:
         List[AppView]: AppViews matching the specified criteria.
     """
-    views_arr = managers.view_collection.GetViewsByZOrder()
+    views_arr = managers.view_collection.GetViewsByZOrder() # type: ignore
     all_views = [AppView(view=v) for v in views_arr.iter(IApplicationView)]
     if not switcher_windows and not current_desktop:
         # no filters
@@ -247,7 +247,7 @@ class VirtualDesktop():
         if number:
             if number <= 0:
                 raise ValueError(f"Desktop number must be at least 1, {number} provided")
-            array = managers.manager_internal.get_all_desktops()
+            array = managers.manager_internal.get_all_desktops() # type: ignore
             desktop_count = array.GetCount()
             if number > desktop_count:
                 raise ValueError(
@@ -256,13 +256,13 @@ class VirtualDesktop():
             self._virtual_desktop = array.get_at(number - 1, IVirtualDesktop)
 
         elif desktop_id:
-            self._virtual_desktop = managers.manager_internal.FindDesktop(desktop_id)
+            self._virtual_desktop = managers.manager_internal.FindDesktop(desktop_id) # type: ignore
 
         elif desktop:
             self._virtual_desktop = desktop
 
         elif current:
-            self._virtual_desktop = managers.manager_internal.get_current_desktop()
+            self._virtual_desktop = managers.manager_internal.get_current_desktop() # type: ignore
 
         else:
             raise Exception("Must provide one of 'number', 'desktop_id' or 'desktop'")
@@ -284,7 +284,7 @@ class VirtualDesktop():
         Returns:
             VirtualDesktop: The created desktop.
         """
-        desktop = managers.manager_internal.create_desktop()
+        desktop = managers.manager_internal.create_desktop() # type: ignore
         return cls(desktop=desktop)
 
     @property
@@ -294,7 +294,7 @@ class VirtualDesktop():
         Returns:
             GUID: The unique id for this desktop.
         """
-        return self._virtual_desktop.GetID()
+        return self._virtual_desktop.GetID() # type: ignore
 
     @property
     def number(self) -> int:
@@ -304,7 +304,7 @@ class VirtualDesktop():
         Returns:
             int: The desktop number.
         """
-        array = managers.manager_internal.get_all_desktops()
+        array = managers.manager_internal.get_all_desktops() # type: ignore
         for i, vd in enumerate(array.iter(IVirtualDesktop), 1):
             if self.id == vd.GetID():
                 return i
@@ -324,12 +324,12 @@ class VirtualDesktop():
             NotImplementedError: If the Windows version is < 19041.
         """
         if build.OVER_21313:
-            return str(self._virtual_desktop.GetName())
+            return str(self._virtual_desktop.GetName()) # type: ignore
 
         if not build.OVER_19041:
             raise NotImplementedError(f"{VirtualDesktop.name.fget.__name__} is not supported on < 19041 versions")
 
-        array = managers.manager_internal.get_all_desktops()
+        array = managers.manager_internal.get_all_desktops() # type: ignore
         for vd in array.iter(IVirtualDesktop2):
             if self.id == vd.GetID():
                 return str(vd.GetName())
@@ -346,14 +346,14 @@ class VirtualDesktop():
             NotImplementedError: If the Windows version is < 19041.
         """
 
-        if managers.manager_internal2 is not None:
-            managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name))
+        if managers.manager_internal2 is not None: # type: ignore
+            managers.manager_internal2.SetName(self._virtual_desktop, HSTRING(name)) # type: ignore
             return
 
         if not build.OVER_19041:
             raise NotImplementedError(f"{VirtualDesktop.rename.__name__} is not supported on < 19041 versions")
 
-        managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name))
+        managers.manager_internal.SetName(self._virtual_desktop, HSTRING(name)) # type: ignore
 
     def remove(self, fallback: Optional[VirtualDesktop] = None):
         """Delete this virtual desktop, falling back to 'fallback'.
@@ -365,7 +365,7 @@ class VirtualDesktop():
         """
         if fallback is None:
             fallback = VirtualDesktop(1)
-        managers.manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop)
+        managers.manager_internal.RemoveDesktop(self._virtual_desktop, fallback._virtual_desktop) # type: ignore
 
     def go(self, allow_set_foreground: bool = True):
         """Switch to this virtual desktop.
@@ -378,7 +378,7 @@ class VirtualDesktop():
         """
         if allow_set_foreground:
             windll.user32.AllowSetForegroundWindow(ASFW_ANY)
-        managers.manager_internal.switch_desktop(self._virtual_desktop)
+        managers.manager_internal.switch_desktop(self._virtual_desktop) # type: ignore
 
     def apps_by_z_order(self, include_pinned: bool = True) -> List[AppView]:
         """Get a list of AppViews, ordered by their Z position, with
@@ -391,7 +391,7 @@ class VirtualDesktop():
         Returns:
             List[AppView]: AppViews matching the specified criteria.
         """
-        views_arr = managers.view_collection.GetViewsByZOrder()
+        views_arr = managers.view_collection.GetViewsByZOrder() # type: ignore
         all_views = [AppView(view=v) for v in views_arr.iter(IApplicationView)]
         result = []
         for view in all_views:
@@ -406,7 +406,7 @@ class VirtualDesktop():
             path (str): path to wallpaper file
         """
         if build.OVER_21313:
-            managers.manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path))
+            managers.manager_internal.SetWallpaper(self._virtual_desktop,path=HSTRING(path)) # type: ignore
         else:
             raise NotImplementedError("set_wallpaper is only available on Windows 11")
 
@@ -417,7 +417,7 @@ def get_virtual_desktops() -> List[VirtualDesktop]:
     Returns:
         List[VirtualDesktop]: Virtual desktops currently active.
     """
-    array = managers.manager_internal.get_all_desktops()
+    array = managers.manager_internal.get_all_desktops() # type: ignore
     return [VirtualDesktop(desktop=vd) for vd in array.iter(IVirtualDesktop)]
 
 
@@ -428,6 +428,6 @@ def set_wallpaper_for_all_desktops(path: str):
         path (str): path to wallpaper file
     """
     if build.OVER_21313:
-        managers.manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path))
+        managers.manager_internal.SetWallpaperForAllDesktops(path=HSTRING(path)) # type: ignore
     else:
         raise NotImplementedError("set_wallpaper_for_all_desktops is only available on Windows 11")
