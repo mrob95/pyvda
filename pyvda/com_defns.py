@@ -190,22 +190,21 @@ class IVirtualDesktopManagerInternal(IUnknown):
             COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
             STDMETHOD(HRESULT, "GetAdjacentDesktop", (POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),)),
             STDMETHOD(HRESULT, "SwitchDesktop", (POINTER(IVirtualDesktop),)),
-            STDMETHOD(HRESULT, "Unknown1", (POINTER(IVirtualDesktop),)),
             COMMETHOD([], HRESULT, "CreateDesktopW", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
-            STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), HWND, INT)),
+            STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), UINT)),
             COMMETHOD([], HRESULT, "RemoveDesktop", (["in"], POINTER(IVirtualDesktop), "destroyDesktop"), (["in"], POINTER(IVirtualDesktop), "fallbackDesktop")),
             COMMETHOD([], HRESULT, "FindDesktop", (["in"], POINTER(GUID), "pGuid"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop")),
-            STDMETHOD(HRESULT, "Unknown2", (POINTER(IVirtualDesktop), POINTER(POINTER(IObjectArray)), POINTER(POINTER(IObjectArray)))),
+            STDMETHOD(HRESULT, "GetDesktopSwitchIncludeExcludeViews", (POINTER(IVirtualDesktop), POINTER(POINTER(IObjectArray)), POINTER(POINTER(IObjectArray)))),
             COMMETHOD([], HRESULT, "SetName", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "name")),
             COMMETHOD([], HRESULT, "SetWallpaper", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "path")),
             COMMETHOD([], HRESULT, "SetWallpaperForAllDesktops", (["in"], HSTRING, "path")),
             COMMETHOD([], HRESULT, "CopyDesktopState", (["in"], POINTER(IApplicationView), "pView0"), (["in"], POINTER(IApplicationView), "pView0")),
-
-            COMMETHOD([], HRESULT, "Unknown3", (["in"], HSTRING, "a1"), (["out"], POINTER(POINTER(IVirtualDesktop)), "out")),
+            COMMETHOD([], HRESULT, "CreateRemoteDesktop", (["in"], HSTRING, "a1"), (["out"], POINTER(POINTER(IVirtualDesktop)), "out")),
             STDMETHOD(HRESULT, "pDesktop", (POINTER(IVirtualDesktop),)),
-            STDMETHOD(HRESULT, "Unknown5", (POINTER(IVirtualDesktop),)),
-            COMMETHOD([], HRESULT, "Unknown6", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
-            STDMETHOD(HRESULT, "Unknown7"),
+            STDMETHOD(HRESULT, "SwitchRemoteDesktop", (POINTER(IVirtualDesktop), UINT)),
+            STDMETHOD(HRESULT, "SwitchDesktopWithAnimation", (POINTER(IVirtualDesktop),)),
+            COMMETHOD([], HRESULT, "GetLastActiveDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            STDMETHOD(HRESULT, "WaitForAnimationToComplete"),
         ]
     elif build.OVER_22621:
         _methods_ = [
@@ -302,35 +301,35 @@ class IVirtualDesktopManagerInternal(IUnknown):
 
     def get_all_desktops(self) -> IObjectArray:
         if build.OVER_22621:
-            return self.GetDesktops()
+            return self.GetDesktops() # type: ignore
         elif build.OVER_20231:
-            return self.GetDesktops(0)
+            return self.GetDesktops(0) # type: ignore
         else:
-            return self.GetDesktops()
+            return self.GetDesktops() # type: ignore
 
     def get_current_desktop(self) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.GetCurrentDesktop()
+            return self.GetCurrentDesktop() # type: ignore
         elif build.OVER_20231:
-            return self.GetCurrentDesktop(0)
+            return self.GetCurrentDesktop(0) # type: ignore
         else:
-            return self.GetCurrentDesktop()
+            return self.GetCurrentDesktop() # type: ignore
 
     def create_desktop(self) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.CreateDesktopW()
+            return self.CreateDesktopW() # type: ignore
         elif build.OVER_20231:
-            return self.CreateDesktopW(0)
+            return self.CreateDesktopW(0) # type: ignore
         else:
-            return self.CreateDesktopW()
+            return self.CreateDesktopW() # type: ignore
 
     def switch_desktop(self, target: IVirtualDesktop) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.SwitchDesktop(target)
+            return self.SwitchDesktop(target) # type: ignore
         elif build.OVER_20231:
-            return self.SwitchDesktop(0, target)
+            return self.SwitchDesktop(0, target) # type: ignore
         else:
-            return self.SwitchDesktop(target)
+            return self.SwitchDesktop(target) # type: ignore
 
 
 GUID_IVirtualDesktopManagerInternal2 = GUID("{0F3A72B0-4566-487E-9A33-4ED302F6D6CE}")
