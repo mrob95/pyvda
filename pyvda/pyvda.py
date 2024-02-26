@@ -83,8 +83,14 @@ class AppView():
         """
         return self._view.GetLastActivationTimestamp()
 
-    def set_focus(self):
-        """Focus the window"""
+    def set_focus(self, allow_set_foreground: bool = True):
+        """Focus the window
+
+        Args:
+            allow_set_foreground (bool, optional): Call AllowSetForegroundWindow(ASFW_ANY) before switching. This partially fixes an issue where the focus remains behind after switching. Defaults to True.
+        """
+        if allow_set_foreground:
+            windll.user32.AllowSetForegroundWindow(ASFW_ANY)
         return self._view.SetFocus()
 
     def switch_to(self):
