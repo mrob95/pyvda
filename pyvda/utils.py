@@ -33,13 +33,11 @@ def _get_object(cls, clsid = None):
             pObject,
         )
     except _ctypes.COMError as e:
-        if e.text == "No such interface supported":
-            winver = sys.getwindowsversion()
-            platver = sys.getwindowsversion().platform_version
-            raise NotImplementedError(
-                f"Interface {cls.__name__} with ID {cls._iid_} not supported for windows version {winver.major}.{winver.minor}.{winver.build}, platform version {platver[0]}.{platver[1]}.{platver[2]}. Please open an issue at https://github.com/mrob95/pyvda/issues."
-            )
-        raise
+        winver = sys.getwindowsversion()
+        platver = sys.getwindowsversion().platform_version
+        raise NotImplementedError(
+            f"Interface {cls.__name__} with ID {cls._iid_} not supported for windows version {winver.major}.{winver.minor}.{winver.build}, platform version {platver[0]}.{platver[1]}.{platver[2]}. Please open an issue at https://github.com/mrob95/pyvda/issues."
+        )
     return pObject
 
 def get_vd_manager_internal():
