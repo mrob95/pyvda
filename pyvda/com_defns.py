@@ -301,35 +301,35 @@ class IVirtualDesktopManagerInternal(IUnknown):
 
     def get_all_desktops(self) -> IObjectArray:
         if build.OVER_22621:
-            return self.GetDesktops()
+            return self.GetDesktops() # type: ignore
         elif build.OVER_20231:
-            return self.GetDesktops(0)
+            return self.GetDesktops(0) # type: ignore
         else:
-            return self.GetDesktops()
+            return self.GetDesktops() # type: ignore
 
     def get_current_desktop(self) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.GetCurrentDesktop()
+            return self.GetCurrentDesktop() # type: ignore
         elif build.OVER_20231:
-            return self.GetCurrentDesktop(0)
+            return self.GetCurrentDesktop(0) # type: ignore
         else:
-            return self.GetCurrentDesktop()
+            return self.GetCurrentDesktop() # type: ignore
 
     def create_desktop(self) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.CreateDesktopW()
+            return self.CreateDesktopW() # type: ignore
         elif build.OVER_20231:
-            return self.CreateDesktopW(0)
+            return self.CreateDesktopW(0) # type: ignore
         else:
-            return self.CreateDesktopW()
+            return self.CreateDesktopW() # type: ignore
 
     def switch_desktop(self, target: IVirtualDesktop) -> IVirtualDesktop:
         if build.OVER_22621:
-            return self.SwitchDesktop(target)
+            return self.SwitchDesktop(target) # type: ignore
         elif build.OVER_20231:
-            return self.SwitchDesktop(0, target)
+            return self.SwitchDesktop(0, target) # type: ignore
         else:
-            return self.SwitchDesktop(target)
+            return self.SwitchDesktop(target) # type: ignore
 
 
 GUID_IVirtualDesktopManagerInternal2 = GUID("{0F3A72B0-4566-487E-9A33-4ED302F6D6CE}")
