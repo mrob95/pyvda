@@ -37,7 +37,7 @@ def _get_object(cls, clsid = None):
             winver = sys.getwindowsversion()
             platver = sys.getwindowsversion().platform_version
             raise NotImplementedError(
-                f"Interface {cls.__name__} not supported for windows version {winver.major}.{winver.minor}.{winver.build}, platform version {platver[0]}.{platver[1]}.{platver[2]}. Please open an issue at https://github.com/mrob95/pyvda/issues."
+                f"Interface {cls.__name__} with ID {cls._iid_} not supported for windows version {winver.major}.{winver.minor}.{winver.build}, platform version {platver[0]}.{platver[1]}.{platver[2]}. Please open an issue at https://github.com/mrob95/pyvda/issues."
             )
         raise
     return pObject
@@ -48,7 +48,7 @@ def get_vd_manager_internal():
 def get_vd_manager_internal2() -> Optional[IVirtualDesktopManagerInternal2]:
     try:
         return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal) # type: ignore
-    except _ctypes.COMError :
+    except NotImplementedError:
         return None
 
 def get_view_collection():
