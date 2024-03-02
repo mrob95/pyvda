@@ -212,16 +212,16 @@ def get_apps_by_z_order(switcher_windows: bool = True, current_desktop: bool = T
     if not switcher_windows and not current_desktop:
         # no filters
         return all_views
-    else:
-        result = []
-        vd = VirtualDesktop.current()
-        for view in all_views:
-            if switcher_windows and not view.is_shown_in_switchers():
-                continue
-            if current_desktop and not view.is_on_desktop(vd):
-                continue
-            result.append(view)
-        return result
+
+    result = []
+    vd = VirtualDesktop.current()
+    for view in all_views:
+        if switcher_windows and not view.is_shown_in_switchers():
+            continue
+        if current_desktop and not view.is_on_desktop(vd):
+            continue
+        result.append(view)
+    return result
 
 
 class VirtualDesktop():
