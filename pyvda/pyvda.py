@@ -185,7 +185,7 @@ class AppView():
 
         """
         if include_pinned:
-            return (self.desktop_id == desktop.id) or self.is_pinned() or self.is_app_pinned()
+            return (self.desktop_id == desktop.id) or self.is_pinned()
         else:
             return self.desktop_id == desktop.id
 
