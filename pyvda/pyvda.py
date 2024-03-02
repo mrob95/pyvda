@@ -3,6 +3,7 @@ from __future__ import annotations
 from ctypes import windll
 from typing import List, Optional
 
+import _ctypes
 from comtypes import GUID
 
 import pyvda.build as build
@@ -51,10 +52,16 @@ class AppView():
         return self._view.GetThumbnailWindow() # type: ignore
 
     @property
-    def app_id(self) -> int:
-        """The ID of this window's app.
+    def app_id(self) -> Optional[int]:
+        """The ID of this window's app. Some specific types of windows do not have an app ID, and will return `None`.
         """
-        return self._view.GetAppUserModelId() # type: ignore
+        try:
+            # For certain types of windows, this will raise a COMError with 'Element not found'.
+            # This seems to happen for things like window managers which are pinned above the normal windows.
+            # Can be reliably reproduced with the 'f.lux' options window.
+            return self._view.GetAppUserModelId() # type: ignore
+        except _ctypes.COMError:
+            return None
 
     @classmethod
     def current(cls):
@@ -121,12 +128,20 @@ class AppView():
         """
         Pin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
+        app_id = self.app_id
+        # This happens in rare cases. See the comment on app_id for more detail.
+        # Returning without doing anything is the best we can do here, and matches the behaviour of the windows UI.
+        if app_id is None:
+            return
         managers.pinned_apps.PinAppID(self.app_id) # type: ignore
 
     def unpin_app(self):
         """
         Unpin this window's app (corresponds to the 'show windows from this app on all desktops' toggle).
         """
+        app_id = self.app_id
+        if app_id is None:
+            return
         managers.pinned_apps.UnpinAppID(self.app_id) # type: ignore
 
     def is_app_pinned(self) -> bool:
@@ -136,6 +151,9 @@ class AppView():
         Returns:
             bool: is the app pinned?.
         """
+        app_id = self.app_id
+        if app_id is None:
+            return
         return managers.pinned_apps.IsAppIdPinned(self.app_id) # type: ignore
 
 
