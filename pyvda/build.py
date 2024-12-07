@@ -18,6 +18,7 @@ OVER_21313 = False
 OVER_22449 = False
 OVER_22621 = False
 OVER_22631 = False
+OVER_26100 = False
 
 def try_create_manager(guid: GUID) -> bool:
     pServiceProvider = CoCreateInstance(
@@ -44,11 +45,24 @@ def do_feature_detection():
     global OVER_22449
     global OVER_22621
     global OVER_22631
+    global OVER_26100
 
     if os.getenv("READTHEDOCS"):
         return
 
     logger.debug("Starting feature detection...")
+    winver = sys.getwindowsversion()
+    # The guid for 26100 seems to also be available on 22631, no the previous method of feature detection is not reliable.
+    if winver.build >= 26100:
+        logger.debug("Feature detection complete. Windows version is over 26100")
+        OVER_19041 = True
+        OVER_20231 = True
+        OVER_21313 = True
+        OVER_22449 = True
+        OVER_22621 = True
+        OVER_22631 = True
+        OVER_26100 = True
+        return
 
     if try_create_manager(const.GUID_IVirtualDesktopManagerInternal_22631):
         logger.debug("Feature detection complete. Windows version is over 22631")

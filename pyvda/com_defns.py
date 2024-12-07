@@ -120,7 +120,9 @@ IApplicationView._methods_ = [
     STDMETHOD(HRESULT, "GetPersistingStateName", (POINTER(PWSTR),)),
 ]
 
-if build.OVER_22631:
+if build.OVER_26100:
+    GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_26100
+elif build.OVER_22631:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22631
 elif build.OVER_22621:
     GUID_IVirtualDesktop = const.GUID_IVirtualDesktop_22621
@@ -167,7 +169,9 @@ class IVirtualDesktop2(IUnknown):
     ]
 
 
-if build.OVER_22631:
+if build.OVER_26100:
+    GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_26100
+elif build.OVER_22631:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22631
 elif build.OVER_22621:
     GUID_IVirtualDesktopManagerInternal = const.GUID_IVirtualDesktopManagerInternal_22621
@@ -181,7 +185,33 @@ else:
 # HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{F31574D6-B682-4CDC-BD56-1827860ABEC6}
 class IVirtualDesktopManagerInternal(IUnknown):
     _iid_ = GUID_IVirtualDesktopManagerInternal
-    if build.OVER_22631:
+    if build.OVER_26100:
+        _methods_ = [
+            COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
+            STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
+            STDMETHOD(HRESULT, "CanViewMoveDesktops", (POINTER(IApplicationView), POINTER(UINT))),
+            COMMETHOD([], HRESULT, "GetCurrentDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            COMMETHOD([], HRESULT, "GetDesktops", (["out"], POINTER(POINTER(IObjectArray)), "array")),
+            STDMETHOD(HRESULT, "GetAdjacentDesktop", (POINTER(IVirtualDesktop), AdjacentDesktop, POINTER(POINTER(IVirtualDesktop)),)),
+            STDMETHOD(HRESULT, "SwitchDesktop", (POINTER(IVirtualDesktop),)),
+            STDMETHOD(HRESULT, "SwitchDesktopAndMoveForegroundView", (POINTER(IVirtualDesktop),)),
+            COMMETHOD([], HRESULT, "CreateDesktopW", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            STDMETHOD(HRESULT, "MoveDesktop", (POINTER(IVirtualDesktop), UINT)),
+            COMMETHOD([], HRESULT, "RemoveDesktop", (["in"], POINTER(IVirtualDesktop), "destroyDesktop"), (["in"], POINTER(IVirtualDesktop), "fallbackDesktop")),
+            COMMETHOD([], HRESULT, "FindDesktop", (["in"], POINTER(GUID), "pGuid"), (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop")),
+            STDMETHOD(HRESULT, "GetDesktopSwitchIncludeExcludeViews", (POINTER(IVirtualDesktop), POINTER(POINTER(IObjectArray)), POINTER(POINTER(IObjectArray)))),
+            COMMETHOD([], HRESULT, "SetName", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "name")),
+            COMMETHOD([], HRESULT, "SetWallpaper", (["in"], POINTER(IVirtualDesktop), "pDesktop"), (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "SetWallpaperForAllDesktops", (["in"], HSTRING, "path")),
+            COMMETHOD([], HRESULT, "CopyDesktopState", (["in"], POINTER(IApplicationView), "pView0"), (["in"], POINTER(IApplicationView), "pView0")),
+            COMMETHOD([], HRESULT, "CreateRemoteDesktop", (["in"], HSTRING, "a1"), (["out"], POINTER(POINTER(IVirtualDesktop)), "out")),
+            STDMETHOD(HRESULT, "pDesktop", (POINTER(IVirtualDesktop),)),
+            STDMETHOD(HRESULT, "SwitchRemoteDesktop", (POINTER(IVirtualDesktop), UINT)),
+            STDMETHOD(HRESULT, "SwitchDesktopWithAnimation", (POINTER(IVirtualDesktop),)),
+            COMMETHOD([], HRESULT, "GetLastActiveDesktop", (["out"], POINTER(POINTER(IVirtualDesktop)), "pDesktop"),),
+            STDMETHOD(HRESULT, "WaitForAnimationToComplete"),
+        ]
+    elif build.OVER_22631:
         _methods_ = [
             COMMETHOD([], HRESULT, "GetCount",  (["out"], POINTER(UINT), "pCount"),),
             STDMETHOD(HRESULT, "MoveViewToDesktop", (POINTER(IApplicationView), POINTER(IVirtualDesktop))),
