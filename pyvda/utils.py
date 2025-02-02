@@ -40,19 +40,19 @@ def _get_object(cls, clsid = None):
         )
     return pObject
 
-def get_vd_manager_internal():
+def get_vd_manager_internal() -> "IVirtualDesktopManagerInternal2":
     return _get_object(IVirtualDesktopManagerInternal, CLSID_VirtualDesktopManagerInternal)
 
-def get_vd_manager_internal2() -> Optional[IVirtualDesktopManagerInternal2]:
+def get_vd_manager_internal2() -> Optional["IVirtualDesktopManagerInternal2"]:
     try:
         return _get_object(IVirtualDesktopManagerInternal2, CLSID_VirtualDesktopManagerInternal) # type: ignore
     except NotImplementedError:
         return None
 
-def get_view_collection():
+def get_view_collection() -> "IApplicationViewCollection":
     return _get_object(IApplicationViewCollection)
 
-def get_pinned_apps():
+def get_pinned_apps() -> "IVirtualDesktopPinnedApps":
     return _get_object(IVirtualDesktopPinnedApps, CLSID_VirtualDesktopPinnedApps)
 
 class Managers(threading.local):
