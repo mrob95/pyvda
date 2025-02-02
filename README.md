@@ -31,5 +31,7 @@ print("Pinning the current window")
 AppView.current().pin()
 ```
 
+<!--
+The build is currently failing due to a lack of windows runners.
 ## Documentation
-Full API documentation can be found at [Read the Docs](https://pyvda.readthedocs.io/en/latest/index.html)
+Full API documentation can be found at [Read the Docs](https://pyvda.readthedocs.io/en/latest/index.html) -->

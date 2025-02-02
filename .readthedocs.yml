@@ -5,6 +5,8 @@
 # Required
 version: 2
 
+# TODO: readthedocs used to offer windows runners, but they are no longer available. This means that the
+# build fails.
 build:
   os: ubuntu-22.04
   tools:
